@@ -1,11 +1,11 @@
 #content {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   margin-left: auto;
   margin-right: auto;
   width: 650px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
 }
 
 #greeting-container {
@@ -13,5 +13,5 @@
 }
 
 html{
-    font-family: 'Roboto Mono', monospace, sans-serif, serif;
+  font-family: 'Roboto Mono', monospace, sans-serif, serif;
 }
