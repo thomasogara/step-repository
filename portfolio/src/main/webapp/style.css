@@ -2,8 +2,16 @@
   margin-left: auto;
   margin-right: auto;
   width: 650px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
 }
 
 #greeting-container {
   margin-top: 20px;
+}
+
+html{
+    font-family: 'Roboto Mono', monospace, sans-serif, serif;
 }
