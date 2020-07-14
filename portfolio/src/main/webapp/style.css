@@ -8,10 +8,21 @@
   width: 650px;
 }
 
-#greeting-container {
-  margin-top: 20px;
+#biography-output{
+  justify-content: left;
+  min-height: 5em;
+  min-width: 100%;
+}
+
+#portrait-photo{
+  height: auto;
+  width: 100%;
 }
 
 html{
+  background: linear-gradient(to bottom, black, #333);
+  background-size: cover;
+  color: #ddd;
   font-family: 'Roboto Mono', monospace, sans-serif, serif;
+  height: 100%;
 }
