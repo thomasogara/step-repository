@@ -51,9 +51,10 @@ const slowFill = async (entity, text, wait_function) => {
 
   const removeCursor = () => {
     if(cursor_attached){
-      entity.innerText = entity.
-          innerText.
-          substr(0, entity.innerText.length - 1);
+      entity.innerText = 
+          entity.
+              innerText.
+                  substr(0, entity.innerText.length - 1);
       cursor_attached = !cursor_attached;
     }
   };
@@ -88,7 +89,13 @@ const sleep = async (time_ms) => (
   new Promise((resolve, reject) => setTimeout(resolve, time_ms))
 );
 
-/* TODO: Improve the method for running `slowFillBiography()` on window load */
-window.onload = async () => {
-  slowFillBiography();
-}
+/* Slow fill biography on page load */
+const main = () => {
+  const window_onload_old = window.onload;
+  window.onload = () => {
+    window_onload_old();
+    slowFillBiography();
+  };
+};
+
+main();
