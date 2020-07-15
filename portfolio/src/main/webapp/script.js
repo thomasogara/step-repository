@@ -92,6 +92,3 @@ const sleep = async (time_ms) => (
 window.onload = async () => {
   slowFillBiography();
 }
-
-
-

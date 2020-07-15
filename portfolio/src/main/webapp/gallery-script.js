@@ -25,4 +25,3 @@ const addProjectsToDOM = async (json) => {
     document.getElementById('content').appendChild(img);
   });
 }
-
