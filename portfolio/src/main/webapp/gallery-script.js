@@ -2,11 +2,9 @@
  * Load project details from local registry of projects (projects.json)
  */
 const loadProjects = async() => {
-  const request = new XMLHttpRequest();
-  request.open("GET", "projects.json", true);
-  request.onload = () => addProjectsToDOM(request.responseText);
-  request.onerror = () => console.error(request.statusText);
-  request.send(null);
+  const response = await fetch('./projects.json');
+  const json = await response.text();
+  addProjectsToDOM(json);
 }
 
 /**
@@ -26,6 +24,7 @@ const addProjectsToDOM = async (json) => {
     - blog_link : a string which contains a URL linking to a blog post about
         the project
   */
+  console.log(json);
   const data = JSON.parse(json);
   data.projects.map(async (project) => {
     const content = document.getElementById('content');
