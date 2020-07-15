@@ -20,11 +20,11 @@
 }
 
 a{
-    color: cyan;
+    color: #ddd;
 }
 
 a:visited{
-    color: pink;
+    color: #ddd;
 }
 
 html{
@@ -32,5 +32,4 @@ html{
   background-size: cover;
   color: #ddd;
   font-family: 'Roboto Mono', monospace, sans-serif, serif;
-  height: 100%;
 }
