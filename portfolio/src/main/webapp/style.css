@@ -19,6 +19,14 @@
   width: 100%;
 }
 
+a{
+    color: cyan;
+}
+
+a:visited{
+    color: pink;
+}
+
 html{
   background: linear-gradient(to bottom, black, #333);
   background-size: cover;
