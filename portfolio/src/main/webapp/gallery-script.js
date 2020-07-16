@@ -3,7 +3,7 @@
  */
 const loadProjects = async() => {
   const response = await fetch('./projects.json');
-  const json = await response.text();
+  const json = await response.json();
   addProjectsToDOM(json);
 }
 
@@ -24,8 +24,6 @@ const addProjectsToDOM = async (json) => {
     - blog_link : a string which contains a URL linking to a blog post about
         the project
   */
-  console.log(json);
-  const data = JSON.parse(json);
   data.projects.map(async (project) => {
     const content = document.getElementById('content');
     const link = document.createElement('a');
