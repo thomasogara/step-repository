@@ -8,26 +8,26 @@
   width: 650px;
 }
 
-#biography-output{
+#biography-output {
   justify-content: left;
   min-height: 5em;
   min-width: 100%;
 }
 
-#portrait-photo{
+#portrait-photo {
   height: auto;
   width: 100%;
 }
 
-a{
+a {
     color: cyan;
 }
 
-a:visited{
+a:visited {
     color: pink;
 }
 
-html{
+html {
   background: linear-gradient(to bottom, black, #333);
   background-size: cover;
   color: #ddd;
