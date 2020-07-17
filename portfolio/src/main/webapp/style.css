@@ -20,6 +20,31 @@
   width: 100%;
 }
 
+#header {
+  background: var(--main-navbar-color);
+  height: 10%;
+  margin: 1rem 0 1rem;
+  width: 100%;
+}
+
+#navbar-list {
+  display: inline;
+  padding: 0;
+}
+
+.nav-tile {
+  background: var(--main-color-2);
+  display: inline-block;
+  margin: 0 1rem 0 1rem;
+}
+
+.nav-tile > a {
+  color: white !important;
+  display: block;
+  font-size: 1.5rem;
+  text-decoration: none;
+}
+
 a {
   color: var(--main-color-4);
 }
@@ -41,5 +66,6 @@ html {
   --main-color-1: #a03e05;
   --main-color-2: #51a86e;
   --main-color-3: #ca054d;
+  --main-navbar-color: #eae2e8;
   --main-text-color: #3b1c32;
 }
