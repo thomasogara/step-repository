@@ -31,7 +31,7 @@ a:visited {
 html {
   background: var(--main-bg-color);
   background-size: cover;
-  color: var(--main-color-3);
+  color: var(--main-text-color);
   font-family: 'Roboto Mono', monospace, sans-serif, serif;
   height: 100%;
 }
@@ -40,6 +40,6 @@ html {
   --main-bg-color: #eae2e8;
   --main-color-1: #a03e05;
   --main-color-2: #51a86e;
-  --main-color-3: #3b1c32;
-  --main-color-4: #ca054d;
+  --main-color-3: #ca054d;
+  --main-text-color: #3b1c32;
 }
