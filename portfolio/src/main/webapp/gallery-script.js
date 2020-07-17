@@ -24,7 +24,7 @@ const addProjectsToDOM = async (json) => {
     - blog_link : a string which contains a URL linking to a blog post about
         the project
   */
-  data.projects.map(async (project) => {
+  json.projects.map(async (project) => {
     const content = document.getElementById('content');
     const link = document.createElement('a');
     const header = document.createElement('h2');
