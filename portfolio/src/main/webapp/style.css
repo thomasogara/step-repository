@@ -9,29 +9,37 @@
   width: 650px;
 }
 
-#biography-output{
+#biography-output {
   justify-content: left;
   min-height: 5em;
   min-width: 100%;
 }
 
-#portrait-photo{
+#portrait-photo {
   height: auto;
   width: 100%;
 }
 
-a{
+a {
     color: #ddd;
 }
 
-a:visited{
+a:visited {
     color: #ddd;
 }
 
-html{
+html {
   background: linear-gradient(to bottom, black, #333);
   background-size: cover;
   color: #ddd;
   font-family: 'Roboto Mono', monospace, sans-serif, serif;
   height: 100%;
+}
+
+:root {
+  --main-bg-color: #dbcbd8;
+  --main-color-1: #f75c03;
+  --main-color-2: #a4d4b4;
+  --main-color-3: #3b1c32;
+  --main-color-4: #ca054d;
 }
