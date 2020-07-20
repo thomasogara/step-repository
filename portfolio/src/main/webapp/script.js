@@ -18,10 +18,10 @@
  */
 const slowFillBiography = async () => {
   const biography_text = 
-      'Hi! My name\'s Thomas, and I\'m just about to start my third year of ' +
-      'studies in University College Dublin. I\'m currently a STEP intern ' +
-      'at Google, and this portfolio aims to showcase my contributions ' + 
-      'during my time here.';
+      `Hi! My name\'s Thomas, and I\'m just about to start my third year of
+      studies in University College Dublin. I\'m currently a STEP intern
+      at Google, and this portfolio aims to showcase my contributions
+      during my time here.`;
   const output_element = document.getElementById('biography');
   const wait_function = () => (Math.floor(Math.random() * 50) + 50);
   slowFill(output_element, biography_text, wait_function);
@@ -30,25 +30,32 @@ const slowFillBiography = async () => {
 /**
  * Fill the text field of a given entity with a given string of text, character
  * by character, at a programmable rate.
- * @param entity The entity to write to the text field of.
- * @param text The text to write to the text field of the entity.
- * @param wait_function A function returning an integer value which is the
+ * @param{Element} entity Element to write to the text field of.
+ * @param{String} text The text to write
+ * @param{Function} wait_function A function returning an integer value which is the
  *    number of milliseconds for which the site will wait between printing
  *    successive tokens.
  */
 const slowFill = async (entity, text, wait_function) => {
-  /*
-    Boolean value indicating if there is a cursor attached to the
-    end of the text field being written to.
-  */
+  // Indicates if there is a cursor attached to the end of the text field
   let cursor_attached = false;
-
-  /* 
-    wait_function must be non-null.
-    all null inputs are normalised to a known default.
-   */
-  if (wait_function == null) wait_function = function() {0};
-
+  
+  if (wait_function == null) wait_function = function() {50};
+  
+  /*
+    The below arrow functions refer to a 'cursor'.
+    This cursor is a reference to the pipe character '|', which
+    is appended to the text field each time a character from the source
+    text is written.
+    The cursor is then removed prior to the writing of the following
+    character from the source text.
+    This achieves a typewriter effect for the user watching the characters
+    slowly fill in the text field.
+  */
+  /*
+    Remove the cursor from the end of the text field of the
+    entity passed as argument.
+  */
   const removeCursor = () => {
     if(cursor_attached){
       entity.innerText = 
@@ -58,13 +65,28 @@ const slowFill = async (entity, text, wait_function) => {
       cursor_attached = !cursor_attached;
     }
   };
+  /*
+    Attach a cursor to the end of the text field of the
+    entity passed as argument.
+  */
   const attachCursor = () => {
     entity.innerText += cursor_attached ? '' : '|';
     cursor_attached = !cursor_attached;
   };
   
+  /*
+    split the text into words using a single space characer
+    ' ' as a seperator, and then split the words into characters
+    using the empty string '' as a delimiter.
+  */
   for(let word of text.split(' ')){
     for(let token of word.split('')){
+      /*
+        further to the typewriter effect mentioned above, each character
+        is written to the text field, followed by a cursor.
+        wait_function() is then called to induce a delay between the
+        printing of consecutive characters.
+      */
       removeCursor();
       entity.innerText += token;
       attachCursor();
