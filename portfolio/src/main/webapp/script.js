@@ -48,7 +48,21 @@ const slowFill = async (entity, text, wait_function) => {
     all null inputs are normalised to a known default.
    */
   if (wait_function == null) wait_function = function() {50};
-
+  
+  /*
+    The below arrow functions refer to a 'cursor'.
+    This cursor is a reference to the pipe character '|', which
+    is appended to the text field each time a character from the source
+    text is written.
+    The cursor is then removed prior to the writing of the following
+    character from the source text.
+    This achieves a typewriter effect for the user watching the characters
+    slowly fill in the text field.
+  */
+  /*
+    Remove the cursor from the end of the text field of the
+    entity passed as argument.
+  */
   const removeCursor = () => {
     if(cursor_attached){
       entity.innerText = 
@@ -58,6 +72,10 @@ const slowFill = async (entity, text, wait_function) => {
       cursor_attached = !cursor_attached;
     }
   };
+  /*
+    Attach a cursor to the end of the text field of the
+    entity passed as argument.
+  */
   const attachCursor = () => {
     entity.innerText += cursor_attached ? '' : '|';
     cursor_attached = !cursor_attached;
