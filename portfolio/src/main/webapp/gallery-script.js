@@ -26,8 +26,8 @@ const addProjectsToDOM = async (json) => {
     and append an img element with that project's preview
     image to the 'content' div of gallery.html
   */
-  data.projects.map(async (project) => {
-    const content = document.getElementById('content');
+  json.projects.map(async (project) => {
+    const content = document.getElementById('projects');
     const link = document.createElement('a');
     const header = document.createElement('h2');
     const details = document.createElement('p');
