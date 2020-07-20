@@ -21,13 +21,16 @@
 }
 
 #header {
-  background: var(--main-navbar-color);
   height: 10%;
-  margin: 1rem 0 1rem;
-  width: 100%;
+  margin: 1rem 0 1rem 0;
 }
 
-#navbar-list {
+#footer {
+  height: 10%;
+  margin: 1rem 0 1rem 0;
+}
+
+.navbar-list {
   display: inline;
   padding: 0;
 }
@@ -66,6 +69,5 @@ html {
   --main-color-1: #a03e05;
   --main-color-2: #51a86e;
   --main-color-3: #ca054d;
-  --main-navbar-color: #eae2e8;
   --main-text-color: #3b1c32;
 }
