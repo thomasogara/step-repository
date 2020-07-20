@@ -81,8 +81,19 @@ const slowFill = async (entity, text, wait_function) => {
     cursor_attached = !cursor_attached;
   };
   
+  /*
+    split the text into words using a single space characer
+    ' ' as a seperator, and then split the words into characters
+    using the empty string '' as a delimiter.
+  */
   for(let word of text.split(' ')){
     for(let token of word.split('')){
+      /*
+        further to the typewriter effect mentioned above, each character
+        is written to the text field, followed by a cursor.
+        wait_function() is then called to induce a delay between the
+        printing of consecutive characters.
+      */
       removeCursor();
       entity.innerText += token;
       attachCursor();
