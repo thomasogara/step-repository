@@ -25,7 +25,7 @@ const addProjectsToDOM = async (json) => {
         the project
   */
   json.projects.map(async (project) => {
-    const content = document.getElementById('content');
+    const content = document.getElementById('projects');
     const link = document.createElement('a');
     const header = document.createElement('h2');
     const details = document.createElement('p');
