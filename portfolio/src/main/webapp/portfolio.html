@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="UTF-8">
+  <title>Thomas O'Gara's Step Portfolio</title>
+  <link rel="stylesheet" href="style.css">
+  <div id="content">
+    <h1>Thomas O'Gara's STEP Portfolio</h1>
+    <h2>How I built this portfolio website</h2>
+    <h3>Technology Used</h3>
+    <p>
+      This portfolio website was written using HTML5, CSS3, and JavaScript
+      (version ES6+). There are no external dependencies in the backend or
+      front-end software.
+    </p>
+    <h3>Data Management</h3>
+    <p>
+      For persistent data storage, I used a JSON file hosted
+      on the server, and fetched it using the ES6+
+      <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API">
+      fetch()</a> function. Since the persistent storage requirements of
+      the site are read-only from a user perspective, this is the ideal
+      solution; it does not mandate that a database management system would run
+      on the server at all times, which is costly. Running a DBMS also
+      introduces a potential point of failure for the site's backend.
+      Using a JSON file to store persistent data also reduces the number of
+      dependencies on the front-end software, as parsing JSON data in ES6+
+      JavaScript is a native feature, and does not require the use of any
+      third-party libraries.
+    </p>
+  </div>
