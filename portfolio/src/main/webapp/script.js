@@ -30,9 +30,9 @@ const slowFillBiography = async () => {
 /**
  * Fill the text field of a given entity with a given string of text, character
  * by character, at a programmable rate.
- * @param entity The entity to write to the text field of.
- * @param text The text to write to the text field of the entity.
- * @param wait_function A function returning an integer value which is the
+ * @param{Element} entity Element to write to the text field of.
+ * @param{String} text The text to write
+ * @param{Function} wait_function A function returning an integer value which is the
  *    number of milliseconds for which the site will wait between printing
  *    successive tokens.
  */
