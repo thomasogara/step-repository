@@ -21,25 +21,25 @@
 }
 
 a {
-    color: #ddd;
+  color: var(--main-color-4);
 }
 
 a:visited {
-    color: #ddd;
+  color: var(--main-color-1);
 }
 
 html {
-  background: linear-gradient(to bottom, black, #333);
+  background: var(--main-bg-color);
   background-size: cover;
-  color: #ddd;
+  color: var(--main-color-3);
   font-family: 'Roboto Mono', monospace, sans-serif, serif;
   height: 100%;
 }
 
 :root {
-  --main-bg-color: #dbcbd8;
+  --main-bg-color: #eae2e8;
   --main-color-1: #f75c03;
-  --main-color-2: #a4d4b4;
+  --main-color-2: #51a86e;
   --main-color-3: #3b1c32;
   --main-color-4: #ca054d;
 }
