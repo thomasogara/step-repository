@@ -89,6 +89,24 @@ const sleep = async (time_ms) => (
   new Promise((resolve, reject) => setTimeout(resolve, time_ms))
 );
 
+/**
+ * Load comments and add them to the page
+ */
+const loadComments = async () => {
+  const data = await fetch('/data');
+  const comments = await data.json();
+  console.log(comments);
+  const container = document.getElementById('comments');
+  comments.map((comment) => {
+    const div = document.createElement('div');
+    const paragraph = document.createElement('p');
+    container.appendChild(div);
+    div.appendChild(paragraph);
+    div.id = comment.id;
+    paragraph.innerText = `[${comment.timestamp}]: ${comment.text}`;
+  });
+}
+
 /* Slow fill biography on page load */
 const main = () => {
   const window_onload_old = window.onload;
@@ -97,6 +115,7 @@ const main = () => {
       window_onload_old();
     }
     slowFillBiography();
+    loadComments();
   };
 };
 
