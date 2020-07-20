@@ -3,7 +3,7 @@
  */
 const loadProjects = async() => {
   const response = await fetch('./projects.json');
-  const json = await response.text();
+  const json = await response.json();
   addProjectsToDOM(json);
 }
 
