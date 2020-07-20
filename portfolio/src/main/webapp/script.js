@@ -43,19 +43,19 @@ const slowFill = async (entity, text, wait_function) => {
   if (wait_function == null) wait_function = function() {50};
   
   /*
-    The below arrow functions refer to a 'cursor'.
-    This cursor is a reference to the pipe character '|', which
-    is appended to the text field each time a character from the source
-    text is written.
-    The cursor is then removed prior to the writing of the following
-    character from the source text.
-    This achieves a typewriter effect for the user watching the characters
-    slowly fill in the text field.
-  */
+   * The below arrow functions refer to a 'cursor'.
+   * This cursor is a reference to the pipe character '|', which
+   * is appended to the text field each time a character from the source
+   * text is written.
+   * The cursor is then removed prior to the writing of the following
+   * character from the source text.
+   * This achieves a typewriter effect for the user watching the characters
+   * slowly fill in the text field.
+   */
   /*
-    Remove the cursor from the end of the text field of the
-    entity passed as argument.
-  */
+   * Remove the cursor from the end of the text field of the
+   * entity passed as argument.
+   */
   const removeCursor = () => {
     if(cursor_attached){
       entity.innerText = 
@@ -66,26 +66,26 @@ const slowFill = async (entity, text, wait_function) => {
     }
   };
   /*
-    Attach a cursor to the end of the text field of the
-    entity passed as argument.
-  */
+   * Attach a cursor to the end of the text field of the
+   * entity passed as argument.
+   */
   const attachCursor = () => {
     entity.innerText += cursor_attached ? '' : '|';
     cursor_attached = !cursor_attached;
   };
   
   /*
-    split the text into words using a single space characer
-    ' ' as a seperator, and then split the words into characters
-    using the empty string '' as a delimiter.
-  */
+   * split the text into words using a single space characer
+   * ' ' as a seperator, and then split the words into characters
+   * using the empty string '' as a delimiter.
+   */
   for(let word of text.split(' ')){
     for(let token of word.split('')){
       /*
-        further to the typewriter effect mentioned above, each character
-        is written to the text field, followed by a cursor.
-        wait_function() is then called to induce a delay between the
-        printing of consecutive characters.
+       * further to the typewriter effect mentioned above, each character
+       * is written to the text field, followed by a cursor.
+       * wait_function() is then called to induce a delay between the
+       * printing of consecutive characters.
       */
       removeCursor();
       entity.innerText += token;
@@ -94,8 +94,8 @@ const slowFill = async (entity, text, wait_function) => {
     }
     removeCursor();
     /*
-      HTML entity reference was necessary as '&ensp;' cannot
-      otherwise be referenced in a string literal.
+     * HTML entity reference was necessary as '&ensp;' cannot
+     * otherwise be referenced in a string literal.
     */
     entity.innerHTML += '&ensp;';
   }
