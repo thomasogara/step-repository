@@ -18,10 +18,10 @@
  */
 const slowFillBiography = async () => {
   const biography_text = 
-      'Hi! My name\'s Thomas, and I\'m just about to start my third year of ' +
-      'studies in University College Dublin. I\'m currently a STEP intern ' +
-      'at Google, and this portfolio aims to showcase my contributions ' + 
-      'during my time here.';
+      `Hi! My name\'s Thomas, and I\'m just about to start my third year of
+      studies in University College Dublin. I\'m currently a STEP intern
+      at Google, and this portfolio aims to showcase my contributions
+      during my time here.`;
   const output_element = document.getElementById('biography');
   const wait_function = () => (Math.floor(Math.random() * 50) + 50);
   slowFill(output_element, biography_text, wait_function);
