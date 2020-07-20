@@ -2,8 +2,10 @@
   "projects": [
     {
       "title": "Portfolio Website",
-      "URL": "https://github.com/thomasogara/step-repository/portfolio",
-      "preview": ""
+      "URL": "https://github.com/thomasogara/step-repository/tree/master/portfolio",
+      "preview": "",
+      "description": "A portfolio website designed using HTML, CSS, and vanilla JavaScript.",
+      "blog_link": ""
     }
   ]
 }

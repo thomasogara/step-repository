@@ -115,7 +115,9 @@ const sleep = async (time_ms) => (
 const main = () => {
   const window_onload_old = window.onload;
   window.onload = () => {
-    window_onload_old();
+    if (typeof(window_onload_old) === 'function'){
+      window_onload_old();
+    }
     slowFillBiography();
   };
 };
