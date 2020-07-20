@@ -37,16 +37,9 @@ const slowFillBiography = async () => {
  *    successive tokens.
  */
 const slowFill = async (entity, text, wait_function) => {
-  /*
-    Boolean value indicating if there is a cursor attached to the
-    end of the text field being written to.
-  */
+  // Indicates if there is a cursor attached to the end of the text field
   let cursor_attached = false;
-
-  /* 
-    wait_function must be non-null.
-    all null inputs are normalised to a known default.
-   */
+  
   if (wait_function == null) wait_function = function() {50};
   
   /*
