@@ -47,7 +47,7 @@ const slowFill = async (entity, text, wait_function) => {
     wait_function must be non-null.
     all null inputs are normalised to a known default.
    */
-  if (wait_function == null) wait_function = function() {0};
+  if (wait_function == null) wait_function = function() {50};
 
   const removeCursor = () => {
     if(cursor_attached){
