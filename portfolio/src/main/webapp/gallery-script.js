@@ -24,6 +24,13 @@ const addProjectsToDOM = async (json) => {
     - blog_link : a string which contains a URL linking to a blog post about
         the project
   */
+  console.log(json);
+  const data = JSON.parse(json);
+  /*
+    process each project contained within the json object,
+    and append an img element with that project's preview
+    image to the 'content' div of gallery.html
+  */
   data.projects.map(async (project) => {
     const content = document.getElementById('content');
     const link = document.createElement('a');
