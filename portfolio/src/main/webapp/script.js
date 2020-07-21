@@ -117,7 +117,6 @@ const sleep = async (time_ms) => (
 const loadComments = async () => {
   const data = await fetch('/comments');
   const comments = await data.json();
-  console.log(comments);
   const container = document.getElementById('comments');
   comments.map((comment) => {
     const div = document.createElement('div');
