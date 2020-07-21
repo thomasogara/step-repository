@@ -32,9 +32,9 @@ const slowFillBiography = async () => {
  * by character, at a programmable rate.
  * @param{Element} entity Element to write to the text field of.
  * @param{String} text The text to write
- * @param{Function} wait_function A function returning an integer value which is the
- *    number of milliseconds for which the site will wait between printing
- *    successive tokens.
+ * @param{Function} wait_function A function returning an integer value which
+ *    is the number of milliseconds for which the site will wait between
+ *    printing successive tokens.
  */
 const slowFill = async (entity, text, wait_function) => {
   // Indicates if there is a cursor attached to the end of the text field
@@ -117,7 +117,6 @@ const sleep = async (time_ms) => (
 const loadComments = async () => {
   const data = await fetch('/data');
   const comments = await data.json();
-  console.log(comments);
   const container = document.getElementById('comments');
   comments.map((comment) => {
     const div = document.createElement('div');
