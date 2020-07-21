@@ -32,9 +32,9 @@ const slowFillBiography = async () => {
  * by character, at a programmable rate.
  * @param{Element} entity Element to write to the text field of.
  * @param{String} text The text to write
- * @param{Function} wait_function A function returning an integer value which is the
- *    number of milliseconds for which the site will wait between printing
- *    successive tokens.
+ * @param{Function} wait_function A function returning an integer value which
+ *    is the number of milliseconds for which the site will wait between
+ *    printing successive tokens.
  */
 const slowFill = async (entity, text, wait_function) => {
   // Indicates if there is a cursor attached to the end of the text field
@@ -111,6 +111,23 @@ const sleep = async (time_ms) => (
   new Promise((resolve, reject) => setTimeout(resolve, time_ms))
 );
 
+/**
+ * Load comments and add them to the page
+ */
+const loadComments = async () => {
+  const data = await fetch('/data');
+  const comments = await data.json();
+  const container = document.getElementById('comments');
+  comments.map((comment) => {
+    const div = document.createElement('div');
+    const paragraph = document.createElement('p');
+    container.appendChild(div);
+    div.appendChild(paragraph);
+    div.id = comment.id;
+    paragraph.innerText = `[${comment.timestamp}]: ${comment.text}`;
+  });
+}
+
 /* Slow fill biography on page load */
 const main = () => {
   const window_onload_old = window.onload;
@@ -119,6 +136,7 @@ const main = () => {
       window_onload_old();
     }
     slowFillBiography();
+    loadComments();
   };
 };
 
