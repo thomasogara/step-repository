@@ -148,7 +148,7 @@ const selectionChangeHandler = async (value) => {
   // it will be used in the functionality of a later update.
   const formMaxCommentsElement = document.getElementById('hiddenMaxComments');
   formMaxCommentsElement.value = value;
-  
+
   // once #hiddenMaxComments has been updated, reload the comments according to
   // the updated value of the select element
   loadComments(value);
