@@ -62,6 +62,10 @@ public class DataServlet extends HttpServlet {
     String commentText = getParameter(request, "commentText", "");
     long timestamp = System.currentTimeMillis();
 
+    if (commentText.replaceAll("\\s+", "").equals("")) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+    }
+
     Entity commentEntity = new Entity("Comment");
     commentEntity.setProperty("text", commentText);
     commentEntity.setProperty("timestamp", timestamp);
