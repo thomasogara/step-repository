@@ -61,6 +61,21 @@ public class DataServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
     String commentText = getParameter(request, "commentText", "");
     long timestamp = System.currentTimeMillis();
+    
+    /* 
+     * \\s represents any whitespace character
+     * + is a quantifier. it translates to 'one or more'
+     * the pattern therefore matches 'one or more whitespace characters'
+     */
+    String WHITESPACE_REGEX = "\\s+";
+    
+    /* remove all whitespace from the commentText String */
+    String commentTextWhitespaceRemoved = commentText.replaceAll(WHITESPACE_REGEX, "");
+    
+    /* if the commentText String, with all whitespace removed, is empty, then the comment is rejected */
+    if (commentTextWhiteSpaceRemoved.equals("")) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+    }
 
     Entity commentEntity = new Entity("Comment");
     commentEntity.setProperty("text", commentText);

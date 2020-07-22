@@ -22,7 +22,9 @@
     </p>
     <form action="/comments" method="POST">
       <span>Type your comment here!</span>
-      <input name="commentText" type="text">
+      <input name="commentText" type="text"
+          required="true" minlength="5"
+      >
     </form>
     <div id="comments">
     </div>
