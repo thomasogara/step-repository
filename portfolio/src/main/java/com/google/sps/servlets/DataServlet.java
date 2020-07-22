@@ -48,9 +48,9 @@ public class DataServlet extends HttpServlet {
     PreparedQuery results = datastore.prepare(query);
 
     List<Comment> comments = new ArrayList<>();
-    Iterator<Entity> iterator = results.asIterable().iterator();
-    while ( iterator.hasNext() && comments.size() < maxComments ) {
-      Entity entity = iterator.next();
+    Iterator<Entity> resultsIterator = results.asIterable().iterator();
+    while ( resultsIterator.hasNext() && comments.size() < maxComments ) {
+      Entity entity = resultsIterator.next();
       long id = entity.getKey().getId();
       String title = (String) entity.getProperty("title");
       String text = (String) entity.getProperty("text");
