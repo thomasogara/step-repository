@@ -115,7 +115,7 @@ const sleep = async (time_ms) => (
  * Load comments and add them to the page
  */
 const loadComments = async () => {
-  const data = await fetch('/comments');
+  const data = await fetch('/data');
   const comments = await data.json();
   const container = document.getElementById('comments');
   comments.map((comment) => {
