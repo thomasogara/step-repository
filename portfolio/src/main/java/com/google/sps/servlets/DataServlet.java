@@ -24,7 +24,6 @@ import com.google.gson.Gson;
 import com.google.sps.data.Comment;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -48,9 +47,10 @@ public class DataServlet extends HttpServlet {
     PreparedQuery results = datastore.prepare(query);
 
     List<Comment> comments = new ArrayList<>();
-    Iterator<Entity> resultsIterator = results.asIterable().iterator();
-    while ( resultsIterator.hasNext() && comments.size() < maxComments ) {
-      Entity entity = resultsIterator.next();
+    for ( Entity entity : results.asIterable() ) {
+      if (comments.size() >= maxComments ) {
+        break;
+      }
       long id = entity.getKey().getId();
       String title = (String) entity.getProperty("title");
       String text = (String) entity.getProperty("text");
