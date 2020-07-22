@@ -20,11 +20,24 @@
       please see the <a href="gallery.html">gallery page</a> of this
       portfolio
     </p>
+    <!-- select element allowing the user to specify a max
+        number of comments to display on the page -->
+    <select type="range" min="0" max="25"
+        id="maxComments"
+        onchange="selectionChangeHandler(this.value);"
+    >
+      <option value="5">5</option>
+      <option value="10">10</option>
+      <option value="25">25</option>
+      <option value="-1">All</option>
+    </select>
     <form action="/comments" method="POST">
       <span>Type your comment here!</span>
-      <input name="commentText" type="text"
-          required="true" minlength="5"
-      >
+      <input name="text" type="text">
+      <!-- hidden input element used to shadow select
+          element with id #maxComments -->
+      <input name="maxComments" type="hidden"
+          id="hiddenMaxComments">
     </form>
     <div id="comments">
     </div>
