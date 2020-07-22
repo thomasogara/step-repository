@@ -179,12 +179,10 @@ const setMaxComments = (value) => {
     optionValues.push(option.value);
   }
   const index = optionValues.indexOf(value);
-  // while -1 is a valid value for the value of the select element, 5 is the
-  // intended default. allowing all unknown values to be normalised to -1 would
-  // result in all comments being displayed for all unknown values. this also
-  // would apply to cases where no maxComments parameter is received.
+  // if the passed value is not a valid option (not found in options array), set the value to 5
   if (index === -1) {
-    index = 5;
+    // option with value 5 is stored at index 0
+    index = 0;
   }
   maxCommentsElement.selectedIndex = index;
 }
