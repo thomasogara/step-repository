@@ -115,7 +115,7 @@ const sleep = async (time_ms) => (
  * Load comments and add them to the page
  */
 const loadComments = async () => {
-  const data = await fetch('/data');
+  const data = await fetch('/comments');
   const comments = await data.json();
   const container = document.getElementById('comments');
   comments.map((comment) => {
@@ -127,7 +127,8 @@ const loadComments = async () => {
     div.appendChild(paragraph);
     div.id = comment.id;
     title.innerText = comment.title;
-    paragraph.innerText = `[${comment.timestamp}]: ${comment.text}`;
+    const timestamp = new Date(comment.timestamp);
+    paragraph.innerText = `[${timestamp.toLocaleString()}]: ${comment.text}`;
   });
 }
 
