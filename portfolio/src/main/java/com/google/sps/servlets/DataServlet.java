@@ -38,8 +38,10 @@ public class DataServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     long maxComments = Long.parseLong(request.getParameter("maxComments"));
+
+    // a value of -1 indicates that ALL comments are wanted
     if (maxComments == -1) maxComments = Long.MAX_VALUE;
-    System.out.println(maxComments);
+
     Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
