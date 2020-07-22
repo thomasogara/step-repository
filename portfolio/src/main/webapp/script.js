@@ -191,6 +191,7 @@ window.onload = async () => {
   slowFillBiography();
   // retrieve the 'maxComments' GET parameter from the URL string
   // and use it to only load the requested number of comments on page load.
+  // by default, if no paramter is provided, maxComments is 5
   const maxComments = getParameter('maxComments') || '5';
   // set the value of the select element to the value supplied by the
   // GET parameter.
