@@ -122,13 +122,22 @@ const loadComments = async () => {
     const div = document.createElement('div');
     const paragraph = document.createElement('p');
     const title = document.createElement('h3');
+    const timestamp = document.createElement('span');
+
     container.appendChild(div);
     div.appendChild(title);
     div.appendChild(paragraph);
+    div.appendChild(timestamp);
+
+    div.classList.add('comment');
+    title.classList.add('comment-title');
+    paragraph.classList.add('comment-body');
+    timestamp.classList.add('comment-timestamp');
+    
     div.id = comment.id;
     title.innerText = comment.title;
-    const timestamp = new Date(comment.timestamp);
-    paragraph.innerText = `[${timestamp.toLocaleString()}]: ${comment.text}`;
+    paragraph.innerText = comment.text;
+    timestamp.innerText = comment.timestamp.toLocaleString();
   });
 }
 
