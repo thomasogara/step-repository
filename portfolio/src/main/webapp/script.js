@@ -137,7 +137,7 @@ const loadComments = async () => {
     div.id = comment.id;
     title.innerText = comment.title;
     paragraph.innerText = comment.text;
-    timestamp.innerText = comment.timestamp.toLocaleString();
+    timestamp.innerText = new Date(comment.timestamp).toLocaleString();
   });
 }
 
