@@ -178,9 +178,11 @@ const setMaxComments = (value) => {
   for (let option of maxCommentsElement.options) {
     optionValues.push(option.value);
   }
-  const index = optionValues.indexOf(value);
+  let index = optionValues.indexOf(value);
+  // .indexOf() will return -1 if the item is not present in the array
+  const notFound = -1;
   // if the passed value is not a valid option (not found in options array), set the value to 5
-  if (index === -1) {
+  if (index === notFound) {
     // option with value 5 is stored at index 0
     index = 0;
   }
