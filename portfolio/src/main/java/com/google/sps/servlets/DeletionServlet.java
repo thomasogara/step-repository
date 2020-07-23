@@ -20,11 +20,11 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.gson.Gson;
 import java.io.IOException;
-import java.util.stream.Collectors;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
 
 /** Servlet that returns a programmable number of comments */
 @WebServlet("/delete-comment")
@@ -36,13 +36,7 @@ public class DeletionServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
     // get the body of the request
-    String bodyString =
-        request
-            .getReader()
-                .lines()
-                    .collect(
-                        Collectors.joining(System.lineSeparator())
-                    );
+    String bodyString = IOUtils.toString(request.getReader());
 
     Gson gson = new Gson();
     DeletionRequestBody body =
