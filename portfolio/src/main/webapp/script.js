@@ -112,12 +112,21 @@ const sleep = async (time_ms) => (
 );
 
 /**
- * Load comments and add them to the page
+ * Fetch a given number of comments and add them to the DOM.
+ * @param{Number} maxComments The maximum number of comments to fetch
+ *    from the server.
  */
-const loadComments = async () => {
-  const data = await fetch('/data');
+const loadComments = async (maxComments) => {
+  const data = await fetch(`/comments?maxComments=${maxComments}`);
   const comments = await data.json();
   const container = document.getElementById('comments');
+  // clear the contents of the div containing the comments.
+  // this prevents duplication of comments on the front-end.
+  container.innerHTML = '';
+
+  // process each comment, and add it to the DOM.
+  // currently, comments are simply paragraphs embedded
+  // in a div container
   comments.map((comment) => {
     const div = document.createElement('div');
     const paragraph = document.createElement('p');
@@ -128,16 +137,29 @@ const loadComments = async () => {
   });
 }
 
-/* Slow fill biography on page load */
-const main = () => {
-  const window_onload_old = window.onload;
-  window.onload = () => {
-    if (typeof(window_onload_old) === 'function'){
-      window_onload_old();
-    }
-    slowFillBiography();
-    loadComments();
-  };
-};
+/**
+ * Handle the change of state of the <select> element
+ * on the page.
+ * @param{Number} value The current value of the select element
+ */
+const selectionChangeHandler = async (value) => {
+  // #hiddenMaxComments is a hidden input entry in the form on the home page.
+  // it is a shadow of the select element, and is submitted along with the form.
+  // it will be used in the functionality of a later update.
+  const formMaxCommentsElement = document.getElementById('hiddenMaxComments');
+  formMaxCommentsElement.value = value;
 
-main();
+  // once #hiddenMaxComments has been updated, reload the comments according to
+  // the updated value of the select element
+  loadComments(value);
+}
+
+window.onload = async () => {
+  slowFillBiography();
+  // retrieve the 'maxComments' GET parameter from the URL string
+  // and use it to only load the requested number of comments on page load.
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  const maxComments = urlParams.get('maxComments') || '-1';
+  loadComments(maxComments);
+}
