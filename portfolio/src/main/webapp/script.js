@@ -125,30 +125,61 @@ const loadComments = async (maxComments) => {
   container.innerHTML = '';
 
   // process each comment, and add it to the DOM.
-  // currently, comments are simply paragraphs embedded
-  // in a div container
   comments.map((comment) => {
     const div = document.createElement('div');
     const paragraph = document.createElement('p');
     const title = document.createElement('h3');
     const timestamp = document.createElement('span');
+    const deleteButton = document.createElement('button');
 
     container.appendChild(div);
     div.appendChild(title);
     div.appendChild(paragraph);
     div.appendChild(timestamp);
+    div.appendChild(deleteButton);
 
     div.classList.add('comment');
     title.classList.add('comment-title');
     paragraph.classList.add('comment-body');
     timestamp.classList.add('comment-timestamp');
-    
+
     div.id = comment.id;
-    title.innerText = comment.title;
+    title.innerText = comment.title || 'This comment does not have a title';
     paragraph.innerText = comment.text;
     timestamp.innerText = new Date(comment.timestamp).toLocaleString();
+    deleteButton.innerText = 'Delete';
+    deleteButton.onclick = async () => {
+      await deleteComment(comment.id);
+      refreshComments();
+    }
   });
 }
+
+/**
+ * Send a POST request to the server, to delete a comment.
+ * @param {number|string} id id of the comment to delete
+ */
+const deleteComment = async (id) => {
+  const data = {'id': id};
+  const request = {
+    method: 'POST',
+    body: JSON.stringify(data)
+  };
+  const response = await fetch('/delete-comment', request);
+  return response;
+};
+
+/**
+ * Refresh the comments on the page
+ * The select element on the page is polled for the number of comments to load.
+ */
+const refreshComments = async () => {
+  const selectElement = document.getElementById('maxComments');
+  // the onchange() attribute of the select element is re-used
+  // to allow for the comments to be refreshed from any context
+  // in the code base
+  selectElement.onchange();
+};
 
 /**
  * Handle the change of state of the <select> element
