@@ -80,10 +80,10 @@ public class DataServlet extends HttpServlet {
     String WHITESPACE_REGEX = "\\s+";
     
     /* remove all whitespace from the commentText String */
-    String commentTextWhitespaceRemoved = commentText.replaceAll(WHITESPACE_REGEX, "");
+    String commentTextWhitespaceRemoved = text.replaceAll(WHITESPACE_REGEX, "");
     
     /* if the commentText String, with all whitespace removed, is empty, then the comment is rejected */
-    if (commentTextWhiteSpaceRemoved.equals("")) {
+    if (commentTextWhitespaceRemoved.equals("")) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
     }
 
