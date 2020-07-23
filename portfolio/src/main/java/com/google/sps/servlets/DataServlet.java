@@ -46,12 +46,10 @@ public class DataServlet extends HttpServlet {
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery results = datastore.prepare(query);
+    FetchOptions fetchOptions = FetchOptions.Builder.withLimit(maxComments);
 
     List<Comment> comments = new ArrayList<>();
-    for ( Entity entity : results.asIterable() ) {
-      if (comments.size() >= maxComments ) {
-        break;
-      }
+    for ( Entity entity : results.asIterable(fetchOptions) ) {
       long id = entity.getKey().getId();
       String title = (String) entity.getProperty("title");
       String text = (String) entity.getProperty("text");
