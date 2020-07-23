@@ -171,10 +171,10 @@ const getParameter = (name) => {
 const setMaxComments = (value) => {
   const maxCommentsElement = document.getElementById('maxComments');
   const selectedIndex = maxCommentsElement.selectedIndex;
-  const optionValues = [];
   // constructing the optionValues[] array in this way is required as
   // maxCommentsElement.options is an HTMLCollection object, and does not
   // have a .indexOf() function
+  const optionValues = [];
   for (let option of maxCommentsElement.options) {
     optionValues.push(option.value);
   }
