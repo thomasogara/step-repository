@@ -131,23 +131,26 @@ const loadComments = async (maxComments) => {
     const title = document.createElement('h3');
     const timestamp = document.createElement('span');
     const deleteButton = document.createElement('button');
+    const trashImage = document.createElement('img');
 
     container.appendChild(div);
     div.appendChild(title);
     div.appendChild(paragraph);
     div.appendChild(timestamp);
     div.appendChild(deleteButton);
+    deleteButton.appendChild(trashImage);
 
     div.classList.add('comment');
     title.classList.add('comment-title');
     paragraph.classList.add('comment-body');
     timestamp.classList.add('comment-timestamp');
+    deleteButton.classList.add('comment-delete-button');
 
     div.id = comment.id;
     title.innerText = comment.title || 'This comment does not have a title';
     paragraph.innerText = comment.text;
     timestamp.innerText = new Date(comment.timestamp).toLocaleString();
-    deleteButton.innerText = 'Delete';
+    trashImage.src = '/images/trash.png';
     deleteButton.onclick = async () => {
       // the client must wait for confirmation of comment deletion
       // before proceeding to refresh comments, otherwise client will
