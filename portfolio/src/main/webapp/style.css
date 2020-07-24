@@ -30,6 +30,22 @@
   margin: 1rem 0 1rem 0;
 }
 
+.comment {
+  position: relative;
+}
+
+.comment-delete-button {
+  background: var(--main-color-3);
+  border: none;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+.comment-delete-button:hover {
+  border: 2px dashed var(--main-color-2);
+}
+
 .navbar-list {
   display: inline;
   padding: 0;
