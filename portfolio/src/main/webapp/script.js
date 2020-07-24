@@ -154,12 +154,49 @@ const selectionChangeHandler = async (value) => {
   loadComments(value);
 }
 
+/**
+ * Get a specific GET parameter from the query string
+ * @param{String} name The name of the parameter
+ */
+const getParameter = (name) => {
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  return urlParams.get(name);
+}
+
+/**
+ * Set the value of the #maxComments element on the page
+ * @param{Number} value The value to be assigned
+ */
+const setMaxComments = (value) => {
+  const maxCommentsElement = document.getElementById('maxComments');
+  const selectedIndex = maxCommentsElement.selectedIndex;
+  // constructing the optionValues[] array in this way is required as
+  // maxCommentsElement.options is an HTMLCollection object, and does not
+  // have a .indexOf() function
+  const optionValues = [];
+  for (let option of maxCommentsElement.options) {
+    optionValues.push(option.value);
+  }
+  let index = optionValues.indexOf(value);
+  // .indexOf() will return -1 if the item is not present in the array
+  const notFound = -1;
+  // if the passed value is not a valid option (not found in options array), set the value to 5
+  if (index === notFound) {
+    // option with value 5 is stored at index 0
+    index = 0;
+  }
+  maxCommentsElement.selectedIndex = index;
+}
+
 window.onload = async () => {
   slowFillBiography();
   // retrieve the 'maxComments' GET parameter from the URL string
   // and use it to only load the requested number of comments on page load.
-  const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
-  const maxComments = urlParams.get('maxComments') || '-1';
-  loadComments(maxComments);
+  // by default, if no paramter is provided, maxComments is 5
+  const maxComments = getParameter('maxComments') || '5';
+  // set the value of the select element to the value supplied by the
+  // GET parameter.
+  setMaxComments(maxComments);
+  selectionChangeHandler(maxComments);
 }
