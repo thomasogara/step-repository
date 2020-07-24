@@ -112,12 +112,21 @@ const sleep = async (time_ms) => (
 );
 
 /**
- * Load comments and add them to the page
+ * Fetch a given number of comments and add them to the DOM.
+ * @param{Number} maxComments The maximum number of comments to fetch
+ *    from the server.
  */
-const loadComments = async () => {
-  const data = await fetch('/data');
+const loadComments = async (maxComments) => {
+  const data = await fetch(`/comments?maxComments=${maxComments}`);
   const comments = await data.json();
   const container = document.getElementById('comments');
+  // clear the contents of the div containing the comments.
+  // this prevents duplication of comments on the front-end.
+  container.innerHTML = '';
+
+  // process each comment, and add it to the DOM.
+  // currently, comments are simply paragraphs embedded
+  // in a div container
   comments.map((comment) => {
     const div = document.createElement('div');
     const paragraph = document.createElement('p');
@@ -128,16 +137,66 @@ const loadComments = async () => {
   });
 }
 
-/* Slow fill biography on page load */
-const main = () => {
-  const window_onload_old = window.onload;
-  window.onload = () => {
-    if (typeof(window_onload_old) === 'function'){
-      window_onload_old();
-    }
-    slowFillBiography();
-    loadComments();
-  };
-};
+/**
+ * Handle the change of state of the <select> element
+ * on the page.
+ * @param{Number} value The current value of the select element
+ */
+const selectionChangeHandler = async (value) => {
+  // #hiddenMaxComments is a hidden input entry in the form on the home page.
+  // it is a shadow of the select element, and is submitted along with the form.
+  // it will be used in the functionality of a later update.
+  const formMaxCommentsElement = document.getElementById('hiddenMaxComments');
+  formMaxCommentsElement.value = value;
 
-main();
+  // once #hiddenMaxComments has been updated, reload the comments according to
+  // the updated value of the select element
+  loadComments(value);
+}
+
+/**
+ * Get a specific GET parameter from the query string
+ * @param{String} name The name of the parameter
+ */
+const getParameter = (name) => {
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  return urlParams.get(name);
+}
+
+/**
+ * Set the value of the #maxComments element on the page
+ * @param{Number} value The value to be assigned
+ */
+const setMaxComments = (value) => {
+  const maxCommentsElement = document.getElementById('maxComments');
+  const selectedIndex = maxCommentsElement.selectedIndex;
+  // constructing the optionValues[] array in this way is required as
+  // maxCommentsElement.options is an HTMLCollection object, and does not
+  // have a .indexOf() function
+  const optionValues = [];
+  for (let option of maxCommentsElement.options) {
+    optionValues.push(option.value);
+  }
+  let index = optionValues.indexOf(value);
+  // .indexOf() will return -1 if the item is not present in the array
+  const notFound = -1;
+  // if the passed value is not a valid option (not found in options array), set the value to 5
+  if (index === notFound) {
+    // option with value 5 is stored at index 0
+    index = 0;
+  }
+  maxCommentsElement.selectedIndex = index;
+}
+
+window.onload = async () => {
+  slowFillBiography();
+  // retrieve the 'maxComments' GET parameter from the URL string
+  // and use it to only load the requested number of comments on page load.
+  // by default, if no paramter is provided, maxComments is 5
+  const maxComments = getParameter('maxComments') || '5';
+  // set the value of the select element to the value supplied by the
+  // GET parameter.
+  setMaxComments(maxComments);
+  selectionChangeHandler(maxComments);
+}
