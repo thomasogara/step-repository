@@ -38,10 +38,12 @@ public class DeletionServlet extends HttpServlet {
     // get the body of the request
     String bodyString = IOUtils.toString(request.getReader());
 
+    // parse the json request body and create a DeletionRequestBody from its contents
     Gson gson = new Gson();
     DeletionRequestBody body =
         gson.fromJson(bodyString, DeletionRequestBody.class);
 
+    // initialise a connection to DataStore
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     // each key has a unique id associated with it
