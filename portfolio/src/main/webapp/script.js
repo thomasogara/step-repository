@@ -149,6 +149,9 @@ const loadComments = async (maxComments) => {
     timestamp.innerText = new Date(comment.timestamp).toLocaleString();
     deleteButton.innerText = 'Delete';
     deleteButton.onclick = async () => {
+      // the client must wait for confirmation of comment deletion
+      // before proceeding to refresh comments, otherwise client will
+      // fall out of sync with the server
       await deleteComment(comment.id);
       refreshComments();
     }
@@ -165,6 +168,8 @@ const deleteComment = async (id) => {
     method: 'POST',
     body: JSON.stringify(data)
   };
+  // comment deletion cannot be a background task. the response
+  // must be awaited so as to ensure synchronisation between client and server
   const response = await fetch('/delete-comment', request);
   return response;
 };
