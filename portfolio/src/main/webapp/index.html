@@ -21,9 +21,11 @@
       portfolio
     </p>
     <form action="/comments" method="POST">
-      <input name="title" type="text" placeholder="Comment Title"
+      <input name="title" id="comment-title"
+          type="text" placeholder="Comment Title"
           required="true" minlength="5">
-      <input name="text" type="text" placeholder="Comment Body"
+      <input name="text" id="comment-text"
+          type="text" placeholder="Comment Body"
           required="true" minlength="5">
       <input type="submit">
     </form>
