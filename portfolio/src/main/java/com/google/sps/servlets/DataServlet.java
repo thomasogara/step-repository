@@ -64,7 +64,7 @@ public class DataServlet extends HttpServlet {
       }
       long id = entity.getKey().getId();
       String title = (String) entity.getProperty("title");
-      String title = (String) entity.getProperty("imageURL");
+      String imageURL = (String) entity.getProperty("imageURL");
       String text = (String) entity.getProperty("text");
       long timestamp = (long) entity.getProperty("timestamp");
 
