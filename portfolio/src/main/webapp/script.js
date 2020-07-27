@@ -129,12 +129,14 @@ const loadComments = async (maxComments) => {
     const div = document.createElement('div');
     const paragraph = document.createElement('p');
     const title = document.createElement('h3');
+    const commentImage = document.createElement('img');
     const timestamp = document.createElement('span');
     const deleteButton = document.createElement('button');
     const trashImage = document.createElement('img');
 
     container.appendChild(div);
     div.appendChild(title);
+    div.appendChild(commentImage);
     div.appendChild(paragraph);
     div.appendChild(timestamp);
     div.appendChild(deleteButton);
@@ -142,12 +144,14 @@ const loadComments = async (maxComments) => {
 
     div.classList.add('comment');
     title.classList.add('comment-title');
+    commentImage.classList.add('comment-image');
     paragraph.classList.add('comment-body');
     timestamp.classList.add('comment-timestamp');
     deleteButton.classList.add('comment-delete-button');
 
     div.id = comment.id;
     title.innerText = comment.title || 'This comment does not have a title';
+    commentImage.src = comment.imageURL;
     paragraph.innerText = comment.text;
     timestamp.innerText = new Date(comment.timestamp).toLocaleString();
     trashImage.src = '/images/trash.png';
@@ -160,6 +164,19 @@ const loadComments = async (maxComments) => {
     }
   });
 }
+
+/**
+ * Load a url for form upload using the blobstore api.
+ * Files uploaded using the form are posted to the route
+ * which blobstore supplies and then forwarded onto the
+ * /comments route as before
+ */
+const loadFormAction = async () => {
+  const response = await fetch('/file-upload');
+  const url = await response.json();
+  const formElement = document.getElementById('comment-form');
+  formElement.action = url;
+};
 
 /**
  * Send a POST request to the server, to delete a comment.
