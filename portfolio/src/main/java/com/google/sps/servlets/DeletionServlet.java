@@ -38,7 +38,7 @@ public class DeletionServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
     /* 
      * Get the body of the request.
-     * bodyString must be a json encoded DeletionRequestBody, with shape similar to below
+     * deletionRequestJSON must be a json encoded DeletionRequestBody, with shape similar to below
      * {
      *   "id": COMMENT_ID
      * }
