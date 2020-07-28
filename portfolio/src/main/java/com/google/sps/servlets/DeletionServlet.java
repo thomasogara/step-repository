@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 
-/** Servlet that returns a programmable number of comments */
+/** Servlet that deletes a comment whose id is passed to it. */
 @WebServlet("/delete-comment")
 public class DeletionServlet extends HttpServlet {
 
@@ -38,14 +38,14 @@ public class DeletionServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
     /* 
      * Get the body of the request.
-     * deletionRequestJSON must be a json encoded DeletionRequestBody, with shape similar to below
+     * deletionRequestJSON must be a json encoded DeletionRequestBody, with shape similar to below:
      * {
      *   "id": COMMENT_ID
      * }
      */
     String deletionRequestJSON = IOUtils.toString(request.getReader());
 
-    // parse the json request body and create a DeletionRequestBody from its contents
+    // Parse the json request body, and create a DeletionRequestBody from its contents.
     Gson gson = new Gson();
     DeletionRequestBody body = null;
     try {
@@ -54,11 +54,11 @@ public class DeletionServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
     }
 
-    // initialise a connection to DataStore
+    // Initialise a connection to DataStore.
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-    // each key has a unique id associated with it
-    // this id can be used to reconstruct the key using .createKey()
+    // Each key has a unique id associated with it.
+    // This id can be used to reconstruct the key using .createKey()
     Key key = KeyFactory.createKey("Comment", body.getId());
 
     datastore.delete(key);
@@ -66,7 +66,7 @@ public class DeletionServlet extends HttpServlet {
 
   /**
    * @return the request parameter, or the default value if the parameter
-   *         was not specified by the client
+   *         was not specified by the client.
    */
   private String getParameter(HttpServletRequest request, String name, String defaultValue) {
     String value = request.getParameter(name);
@@ -77,10 +77,10 @@ public class DeletionServlet extends HttpServlet {
   }
 
   /**
-    * The body of a request sent to the deletion servlet
+    * The body of a request sent to the deletion servlet.
     */
   private class DeletionRequestBody {
-    // the only parameter in the body is the id of the comment to be deleted
+    // The only parameter in the body is the id of the comment to be deleted.
     private long id;
 
     public long getId() {
