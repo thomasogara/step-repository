@@ -117,14 +117,41 @@ const sleep = async (time_ms) => (
  *    from the server.
  */
 const loadComments = async (maxComments) => {
+  /*
+   * The /comments route exposes a simple API.
+   * This API is available only using the GET http method.
+   * Requests sent to this API must have a body which contains:
+   *   - nothing
+   *   - A single parameter, 'maxComments'
+   * If the request body is non-empty, then maxComments is used to limit
+   * the number of results returned by the request.
+   * The response body will be encoded as json.
+   * The response body will contain a single top-level array, whose
+   * elements will all be Comment objects.
+   * Comment objects have three members:
+   *   id: the id of the comment in the server's datastore
+   *   title: the comment title
+   *   text: the comment text
+   */
   const data = await fetch(`/comments?maxComments=${maxComments}`);
+  /* Parse the JSON response, and store the resulting array */
   const comments = await data.json();
+
   const container = document.getElementById('comments');
-  // clear the contents of the div containing the comments.
-  // this prevents duplication of comments on the front-end.
+  // Clear the contents of the div containing the comments.
+  // This prevents duplication of comments on the front-end.
   container.innerHTML = '';
 
-  // process each comment, and add it to the DOM.
+  /*
+   * Process each comment, and add it to the DOM.
+   * Comments are displayed on screen as a div, which has 5 direct children.
+   * The children of the comment div are:
+   *   - A paragraph element, displaying the comment's text.
+   *   - A h3 element, displaying the comment's title.
+   *   - An img element, displaying the comment's iamge if it exists.
+   *   - A span element, displaying the comment's timestamp.
+   *   - A button element, used to allow comment deletion.
+   */
   comments.map((comment) => {
     const div = document.createElement('div');
     const paragraph = document.createElement('p');
@@ -150,11 +177,13 @@ const loadComments = async (maxComments) => {
     deleteButton.classList.add('comment-delete-button');
 
     div.id = comment.id;
+    /* If the comment has a title, display it, else use the default message */
     title.innerText = comment.title || 'This comment does not have a title';
     commentImage.src = comment.imageURL;
     paragraph.innerText = comment.text;
     timestamp.innerText = new Date(comment.timestamp).toLocaleString();
     trashImage.src = '/images/trash.png';
+    /* Set the function handling the onclick event of the delete button */
     deleteButton.onclick = async () => {
       // the client must wait for confirmation of comment deletion
       // before proceeding to refresh comments, otherwise client will
@@ -166,15 +195,22 @@ const loadComments = async (maxComments) => {
 }
 
 /**
- * Load a url for form upload using the blobstore api.
- * Files uploaded using the form are posted to the route
- * which blobstore supplies and then forwarded onto the
- * /comments route as before
+ * Load the URL for uploading of the comment form.
  */
 const loadFormAction = async () => {
+  /*
+   * The /file-upload route exposes a simple API.
+   * This API is available only using the GET http method.
+   * Requests sent to this API must have an empty body.
+   * The response body will be encoded as JSON.
+   * The response body will contain a single top-level string.
+   * This string points to the upload route created by the BlobStore
+   * API.
+   */
   const response = await fetch('/file-upload');
   const url = await response.json();
   const formElement = document.getElementById('comment-form');
+  /* Set the comment form to upload to the route provided by BlobStore */
   formElement.action = url;
 };
 
