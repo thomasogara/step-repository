@@ -19,6 +19,7 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -37,7 +38,7 @@ public class DeletionServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
     /* 
      * Get the body of the request.
-     * bodyString should be a json encoded DeletionRequestBody, with shape similar to below
+     * bodyString must be a json encoded DeletionRequestBody, with shape similar to below
      * {
      *   "id": COMMENT_ID
      * }
@@ -46,8 +47,12 @@ public class DeletionServlet extends HttpServlet {
 
     // parse the json request body and create a DeletionRequestBody from its contents
     Gson gson = new Gson();
-    DeletionRequestBody body =
-        gson.fromJson(bodyString, DeletionRequestBody.class);
+    DeletionRequestBody body = null;
+    try {
+      body = gson.fromJson(bodyString, DeletionRequestBody.class);
+    } catch (JsonSyntaxException ex) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+    }
 
     // initialise a connection to DataStore
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
