@@ -34,13 +34,20 @@ import javax.servlet.http.HttpServletResponse;
 /** Servlet that returns a programmable number of comments */
 @WebServlet("/comments")
 public class DataServlet extends HttpServlet {
+  private final static int ALL_COMMENTS = -1;
+
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    int maxComments = Integer.parseInt(request.getParameter("maxComments"));
+    String parameterMaxComments = getParameter(request, "maxComments", "");
+    int maxComments = 0;
 
-    // a value of -1 indicates that ALL comments are wanted
-    if (maxComments == -1) maxComments = Integer.MAX_VALUE;
+    try{
+      maxComments = Integer.parseInt(parameterMaxComments);
+    } catch (NumberFormatException ex) {
+      // If maxComments parameter is excluded or malformed, return all comments
+      maxComments = DataServlet.ALL_COMMENTS;
+    }
 
     Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
 
