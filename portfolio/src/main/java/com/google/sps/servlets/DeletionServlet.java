@@ -35,7 +35,13 @@ public class DeletionServlet extends HttpServlet {
     */
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
-    // get the body of the request
+    /* 
+     * Get the body of the request.
+     * bodyString should be a json encoded DeletionRequestBody, with shape similar to below
+     * {
+     *   "id": [COMMENT_ID]
+     * }
+     */
     String bodyString = IOUtils.toString(request.getReader());
 
     // parse the json request body and create a DeletionRequestBody from its contents
