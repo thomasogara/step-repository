@@ -43,13 +43,13 @@ public class DeletionServlet extends HttpServlet {
      *   "id": COMMENT_ID
      * }
      */
-    String bodyString = IOUtils.toString(request.getReader());
+    String deletionRequestJSON = IOUtils.toString(request.getReader());
 
     // parse the json request body and create a DeletionRequestBody from its contents
     Gson gson = new Gson();
     DeletionRequestBody body = null;
     try {
-      body = gson.fromJson(bodyString, DeletionRequestBody.class);
+      body = gson.fromJson(deletionRequestJSON, DeletionRequestBody.class);
     } catch (JsonSyntaxException ex) {
       response.sendError(HttpServletResponse.SC_BAD_REQUEST);
     }
