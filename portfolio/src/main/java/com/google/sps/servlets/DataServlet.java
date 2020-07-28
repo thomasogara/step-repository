@@ -41,6 +41,36 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/*
+ * The /comments route exposes a simple API
+ * This API can be accessed by the GET and POST http methods only.
+ * The API allows a client to either:
+ *   - Get a programmable number of comments from the server
+ *   - Post a single comment to the server and store it in the datastore
+ *
+ * GET:
+ * The request body does not have any mandatory parameters.
+ * The request body may optionally contain:
+ *   - A single parameter, 'maxComments'
+ * If the maxComments parameter is included, then maxComments is used to limit
+ * the number of results returned by the request.
+ * The response body will be encoded as json.
+ * The response body will contain a single top-level array, whose
+ * elements will all be Comment objects.
+ * Comment objects have three members:
+ *   id: the id of the comment in the server's datastore
+ *   title: the comment title
+ *   text: the comment text
+ *
+ * POST:
+ * The request body must contain:
+ *   - A 'text' parameter
+ * The request body may optionally contain:
+ *   - A 'title' parameter
+ *   - A 'imageURL' parameter
+ * The response will be a redirect to the homepage of the site.
+ */
+
 /** Servlet that returns a programmable number of comments */
 @WebServlet("/comments")
 public class DataServlet extends HttpServlet {
