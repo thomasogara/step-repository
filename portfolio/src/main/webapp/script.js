@@ -130,9 +130,12 @@ const loadComments = async (maxComments) => {
   comments.map((comment) => {
     const div = document.createElement('div');
     const paragraph = document.createElement('p');
+    const title = document.createElement('h3');
     container.appendChild(div);
+    div.appendChild(title);
     div.appendChild(paragraph);
     div.id = comment.id;
+    title.innerText = comment.title;
     paragraph.innerText = `[${comment.timestamp}]: ${comment.text}`;
   });
 }
