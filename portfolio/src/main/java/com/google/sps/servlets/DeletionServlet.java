@@ -39,7 +39,7 @@ public class DeletionServlet extends HttpServlet {
      * Get the body of the request.
      * bodyString should be a json encoded DeletionRequestBody, with shape similar to below
      * {
-     *   "id": [COMMENT_ID]
+     *   "id": COMMENT_ID
      * }
      */
     String bodyString = IOUtils.toString(request.getReader());
