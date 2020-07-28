@@ -20,7 +20,11 @@
       please see the <a href="gallery.html">gallery page</a> of this
       portfolio
     </p>
-    <!-- Form action is set in loadFormAction() in script.js -->
+    <!--
+      Form action is set in loadFormAction() in script.js
+      The form posts data to the Blobstore API. This API will process
+      any file uploads and forward the processed form onto the /comments route.
+    -->
     <form method="POST" enctype="multipart/form-data" id="comment-form">
       <input name="title" id="comment-title"
           type="text" placeholder="Comment Title"
