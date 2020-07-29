@@ -188,11 +188,11 @@ const loadComments = async (maxComments) => {
       // the client must wait for confirmation of comment deletion
       // before proceeding to refresh comments, otherwise client will
       // fall out of sync with the server
-      await deleteComment(comment.id);
+      await deleteComment(comment.id, comment.imageBlobstoreKey);
       refreshComments();
-    }
+    };
   });
-}
+};
 
 /**
  * Load the URL for uploading of the comment form.
@@ -217,9 +217,10 @@ const loadFormAction = async () => {
 /**
  * Send a POST request to the server, to delete a comment.
  * @param {number|string} id id of the comment to delete
+ * @param {string} imageBlobstoreKey blobstore key of the comment image
  */
-const deleteComment = async (id) => {
-  const data = {'id': id};
+const deleteComment = async (id, imageBlobstoreKey) => {
+  const data = {'id': id, 'imageBlobstoreKey': imageBlobstoreKey};
   const request = {
     method: 'POST',
     body: JSON.stringify(data)
@@ -282,6 +283,7 @@ const setMaxComments = (value) => {
 
 window.onload = async () => {
   slowFillBiography();
+  loadFormAction();
   // retrieve the 'maxComments' value from sessionStorage if a value
   // has been set. if not, set maxComments to 5
   const maxComments = sessionStorage.getItem('maxComments') || '5';
