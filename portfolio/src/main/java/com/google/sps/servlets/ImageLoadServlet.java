@@ -24,6 +24,18 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * The /image-load route exposes a simple API.
+ * This API can be accessed by the GET http method only.
+ *
+ * GET:
+ * The request body must contain:
+ *   - an 'imageBlobstoreKey' parameter
+ * The 'imageBlobstoreKey' parameter is used to identify the image
+ * which is to be sent back in the response.
+ * The response body will contain the image requested.
+ */
+
 /** Servlet that returns a programmable number of comments */
 @WebServlet("/image-load")
 public class ImageLoadServlet extends HttpServlet {
