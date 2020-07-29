@@ -115,7 +115,6 @@ public class DataServlet extends HttpServlet {
     String title = getParameter(request, "title", "");
     String text = getParameter(request, "text", "");
     String imageURL = getUploadedFileUrl(request, "imageURL");
-    long maxComments = Long.parseLong(getParameter(request, "maxComments", ""));
     long timestamp = System.currentTimeMillis();
     
     /* 
@@ -159,9 +158,7 @@ public class DataServlet extends HttpServlet {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(commentEntity);
 
-    response.sendRedirect(
-      String.format("/index.html?maxComments=%d", maxComments)
-    );
+    response.sendRedirect("/index.html");
   }
 
   /**
