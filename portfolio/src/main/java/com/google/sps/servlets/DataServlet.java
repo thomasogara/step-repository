@@ -74,6 +74,7 @@ import javax.servlet.http.HttpServletResponse;
 /** Servlet that returns a programmable number of comments */
 @WebServlet("/comments")
 public class DataServlet extends HttpServlet {
+  public static final String NO_IMAGE_UPLOAD = "";
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -94,11 +95,12 @@ public class DataServlet extends HttpServlet {
       }
       long id = entity.getKey().getId();
       String title = (String) entity.getProperty("title");
-      String imageURL = (String) entity.getProperty("imageURL");
       String text = (String) entity.getProperty("text");
       long timestamp = (long) entity.getProperty("timestamp");
+      String imageURL = (String) entity.getProperty("imageURL");
+      long imageBlobstoreKey = (long) entity.getProperty("imageBlobstoreKey");
 
-      Comment comment = new Comment(id, title, imageURL, text, timestamp);
+      Comment comment = new Comment(id, title, text, timestamp, imageURL, imageBlobstoreKey);
       comments.add(comment);
     }
 
@@ -111,8 +113,8 @@ public class DataServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
     String title = getParameter(request, "title", "");
-    String imageURL = getUploadedFileUrl(request, "imageURL");
     String text = getParameter(request, "text", "");
+    String imageURL = getUploadedFileUrl(request, "imageURL");
     long maxComments = Long.parseLong(getParameter(request, "maxComments", ""));
     long timestamp = System.currentTimeMillis();
     
@@ -131,11 +133,28 @@ public class DataServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
     }
 
+    /* Open a connection to blobstore */
+    BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
+    /* Get a list of all files uploaded to blobstore from this request */
+    Map<String, List<BlobKey>> blobs = blobstoreService.getUploads(request);
+    /* Get the blobKey associated with the image uploaded */
+    List<BlobKey> blobKeys = blobs.get("imageURL");
+
+    String blobKey = NO_IMAGE_UPLOAD;
+
+    // if a file was uploaded
+    if( blobKeys != null && !blobKeys.isEmpty() ) {
+      // the form only contains a single file input, so get the first key
+      blobKey = blobKeys.get(0).toString();
+    }
+
     Entity commentEntity = new Entity("Comment");
     commentEntity.setProperty("title", title);
-    commentEntity.setProperty("imageURL", imageURL);
     commentEntity.setProperty("text", text);
     commentEntity.setProperty("timestamp", timestamp);
+    commentEntity.setProperty("imageURL", imageURL);
+    commentEntity.setProperty("imageBlobstoreKey", blobKey);
+
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(commentEntity);
