@@ -99,10 +99,9 @@ public class DataServlet extends HttpServlet {
       String title = (String) entity.getProperty("title");
       String text = (String) entity.getProperty("text");
       long timestamp = (long) entity.getProperty("timestamp");
-      String imageURL = (String) entity.getProperty("imageURL");
       String imageBlobstoreKey = (String) entity.getProperty("imageBlobstoreKey");
 
-      Comment comment = new Comment(id, title, text, timestamp, imageURL, imageBlobstoreKey);
+      Comment comment = new Comment(id, title, text, timestamp, imageBlobstoreKey);
       comments.add(comment);
     }
 
@@ -117,7 +116,6 @@ public class DataServlet extends HttpServlet {
     String title = getParameter(request, "title", "");
     String text = getParameter(request, "text", "");
     long timestamp = System.currentTimeMillis();
-    String imageURL = getUploadedFileUrl(request, "imageURL");
     
     /* 
      * \\s represents any whitespace character
@@ -153,7 +151,6 @@ public class DataServlet extends HttpServlet {
     commentEntity.setProperty("title", title);
     commentEntity.setProperty("text", text);
     commentEntity.setProperty("timestamp", timestamp);
-    commentEntity.setProperty("imageURL", imageURL);
     commentEntity.setProperty("imageBlobstoreKey", blobKey);
 
 
@@ -173,40 +170,5 @@ public class DataServlet extends HttpServlet {
       return defaultValue;
     }
     return value;
-  }
-
-  /** Returns a URL that points to the uploaded file, or null if the user didn't upload a file. */
-  private String getUploadedFileUrl(HttpServletRequest request, String formInputElementName) {
-    BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
-    Map<String, List<BlobKey>> blobs = blobstoreService.getUploads(request);
-    List<BlobKey> blobKeys = blobs.get(formInputElementName);
-
-    // User submitted form without selecting a file, so we can't get a URL. (dev server)
-    if (blobKeys == null || blobKeys.isEmpty()) {
-      return null;
-    }
-
-    // Our form only contains a single file input, so get the first index.
-    BlobKey blobKey = blobKeys.get(0);
-
-    // User submitted form without selecting a file, so we can't get a URL. (live server)
-    BlobInfo blobInfo = new BlobInfoFactory().loadBlobInfo(blobKey);
-    if (blobInfo.getSize() == 0) {
-      blobstoreService.delete(blobKey);
-      return null;
-    }
-
-    // Use ImagesService to get a URL that points to the uploaded file.
-    ImagesService imagesService = ImagesServiceFactory.getImagesService();
-    ServingUrlOptions options = ServingUrlOptions.Builder.withBlobKey(blobKey);
-
-    // To support running in Google Cloud Shell with AppEngine's dev server, we must use the relative
-    // path to the image, rather than the path returned by imagesService which contains a host.
-    try {
-      URL url = new URL(imagesService.getServingUrl(options));
-      return url.getPath();
-    } catch (MalformedURLException e) {
-      return imagesService.getServingUrl(options);
-    }
   }
 }
