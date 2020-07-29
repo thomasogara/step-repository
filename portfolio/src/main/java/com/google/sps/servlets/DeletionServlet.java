@@ -14,6 +14,9 @@
 
 package com.google.sps.servlets;
 
+import com.google.appengine.api.blobstore.BlobKey;
+import com.google.appengine.api.blobstore.BlobstoreService;
+import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Key;
@@ -49,12 +52,15 @@ public class DeletionServlet extends HttpServlet {
         gson.fromJson(bodyString, DeletionRequestBody.class);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    BlobstoreService blobstore = BlobstoreServiceFactory.getBlobstoreService();
 
     // each key has a unique id associated with it
     // this id can be used to reconstruct the key using .createKey()
     Key key = KeyFactory.createKey("Comment", body.getId());
+    BlobKey blobKey = new BlobKey(body.getImageBlobstoreKey());
 
     datastore.delete(key);
+    blobstore.delete(blobKey);
   }
 
   /**
@@ -75,13 +81,22 @@ public class DeletionServlet extends HttpServlet {
   private class DeletionRequestBody {
     // the only parameter in the body is the id of the comment to be deleted
     private long id;
+    private String imageBlobstoreKey;
 
     public long getId() {
       return this.id;
     }
 
+    public String getImageBlobstoreKey() {
+        return this.imageBlobstoreKey;
+    }
+
     public String toString() {
-      return String.format("DeletionRequestBody{ id=\"%d\" }", this.id);
+      return String.format(
+          "DeletionRequestBody{ id=\"%d\", imageBlobstoreKey = %s }",
+          this.id,
+          this.imageBlobstoreKey
+      );
     }
   }
 }
