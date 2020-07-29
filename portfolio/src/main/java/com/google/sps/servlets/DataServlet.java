@@ -57,10 +57,12 @@ import javax.servlet.http.HttpServletResponse;
  * The response body will be encoded as json.
  * The response body will contain a single top-level array, whose
  * elements will all be Comment objects.
- * Comment objects have three members:
+ * Comment objects have five members:
  *   id: the id of the comment in the server's datastore
  *   title: the comment title
  *   text: the comment text
+ *   timestamp: the comment creation time
+ *   imageBlobstoreKey: the key of the comment image in BlobStore
  *
  * POST:
  * The request body must contain:
@@ -98,7 +100,7 @@ public class DataServlet extends HttpServlet {
       String text = (String) entity.getProperty("text");
       long timestamp = (long) entity.getProperty("timestamp");
       String imageURL = (String) entity.getProperty("imageURL");
-      long imageBlobstoreKey = (long) entity.getProperty("imageBlobstoreKey");
+      String imageBlobstoreKey = (String) entity.getProperty("imageBlobstoreKey");
 
       Comment comment = new Comment(id, title, text, timestamp, imageURL, imageBlobstoreKey);
       comments.add(comment);
@@ -114,8 +116,8 @@ public class DataServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
     String title = getParameter(request, "title", "");
     String text = getParameter(request, "text", "");
-    String imageURL = getUploadedFileUrl(request, "imageURL");
     long timestamp = System.currentTimeMillis();
+    String imageURL = getUploadedFileUrl(request, "imageURL");
     
     /* 
      * \\s represents any whitespace character
@@ -144,7 +146,7 @@ public class DataServlet extends HttpServlet {
     // if a file was uploaded
     if( blobKeys != null && !blobKeys.isEmpty() ) {
       // the form only contains a single file input, so get the first key
-      blobKey = blobKeys.get(0).toString();
+      blobKey = blobKeys.get(0).getKeyString();
     }
 
     Entity commentEntity = new Entity("Comment");
