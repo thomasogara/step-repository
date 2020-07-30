@@ -14,6 +14,7 @@
 
 package com.google.sps.servlets;
 
+
 import com.google.appengine.api.blobstore.BlobInfo;
 import com.google.appengine.api.blobstore.BlobInfoFactory;
 import com.google.appengine.api.blobstore.BlobKey;
@@ -25,9 +26,8 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query.SortDirection;
-import com.google.appengine.api.images.ImagesService;
-import com.google.appengine.api.images.ImagesServiceFactory;
-import com.google.appengine.api.images.ServingUrlOptions;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
 import com.google.sps.data.Comment;
 import java.io.IOException;
@@ -84,7 +84,7 @@ public class DataServlet extends HttpServlet {
 
     // a value of -1 indicates that ALL comments are wanted
     if (maxComments == -1) maxComments = Long.MAX_VALUE;
-
+    
     Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -100,8 +100,9 @@ public class DataServlet extends HttpServlet {
       String text = (String) entity.getProperty("text");
       long timestamp = (long) entity.getProperty("timestamp");
       String imageBlobstoreKey = (String) entity.getProperty("imageBlobstoreKey");
+      String userEmail = (String) entity.getProperty("userEmail");
 
-      Comment comment = new Comment(id, title, text, timestamp, imageBlobstoreKey);
+      Comment comment = new Comment(id, title, text, timestamp, imageBlobstoreKey, userEmail);
       comments.add(comment);
     }
 
@@ -113,8 +114,19 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
+    // open a connection to UserService API
+    UserService userService = UserServiceFactory.getUserService();
+
+    if ( !userService.isUserLoggedIn() ) {
+      final String loginUrl = userService.createLoginURL("/comments");
+      response.sendRedirect(loginUrl);
+      return;
+    }
+      
     String title = getParameter(request, "title", "");
     String text = getParameter(request, "text", "");
+    String userEmail = userService.getCurrentUser().getEmail();
+    System.out.println(userEmail);
     long timestamp = System.currentTimeMillis();
     
     /* 
@@ -152,6 +164,7 @@ public class DataServlet extends HttpServlet {
     commentEntity.setProperty("text", text);
     commentEntity.setProperty("timestamp", timestamp);
     commentEntity.setProperty("imageBlobstoreKey", blobKey);
+    commentEntity.setProperty("userEmail", userEmail);
 
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
