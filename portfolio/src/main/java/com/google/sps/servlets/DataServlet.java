@@ -79,11 +79,11 @@ public class DataServlet extends HttpServlet {
      */
     String WHITESPACE_REGEX = "\\s+";
     
-    /* remove all whitespace from the commentText String */
-    String commentTextWhitespaceRemoved = commentText.replaceAll(WHITESPACE_REGEX, "");
+    /* remove all whitespace from the text String */
+    String commentTextWhitespaceRemoved = text.replaceAll(WHITESPACE_REGEX, "");
     
     /* if the commentText String, with all whitespace removed, is empty, then the comment is rejected */
-    if (commentTextWhiteSpaceRemoved.equals("")) {
+    if (commentTextWhitespaceRemoved.equals("")) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
     }
 
@@ -95,7 +95,9 @@ public class DataServlet extends HttpServlet {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(commentEntity);
 
-    response.sendRedirect("/index.html");
+    response.sendRedirect(
+      String.format("/index.html?maxComments=%d", maxComments)
+    );
   }
 
   /**
