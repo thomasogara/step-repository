@@ -36,7 +36,7 @@ import javax.servlet.http.HttpServletResponse;
  * The response body will contain the image requested.
  */
 
-/** Servlet that returns a programmable number of comments */
+/** Servlet that returns the image associated with a BlobKey */
 @WebServlet("/image-load")
 public class ImageLoadServlet extends HttpServlet {
 
