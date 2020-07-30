@@ -156,25 +156,10 @@ const loadComments = async (maxComments) => {
  * @param{Number} value The current value of the select element
  */
 const selectionChangeHandler = async (value) => {
-  // #hiddenMaxComments is a hidden input entry in the form on the home page.
-  // it is a shadow of the select element, and is submitted along with the form.
-  // it will be used in the functionality of a later update.
-  const formMaxCommentsElement = document.getElementById('hiddenMaxComments');
-  formMaxCommentsElement.value = value;
-
-  // once #hiddenMaxComments has been updated, reload the comments according to
-  // the updated value of the select element
+  // update the value of maxComments in the session storage,
+  // and reload the comments according to the updated value
+  sessionStorage.setItem('maxComments', value);
   loadComments(value);
-}
-
-/**
- * Get a specific GET parameter from the query string
- * @param{String} name The name of the parameter
- */
-const getParameter = (name) => {
-  const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
-  return urlParams.get(name);
 }
 
 /**
@@ -200,14 +185,14 @@ const setMaxComments = (value) => {
     index = 0;
   }
   maxCommentsElement.selectedIndex = index;
+  sessionStorage.setItem('maxComments', maxCommentsElement[index]);
 }
 
 window.onload = async () => {
   slowFillBiography();
-  // retrieve the 'maxComments' GET parameter from the URL string
-  // and use it to only load the requested number of comments on page load.
-  // by default, if no paramter is provided, maxComments is 5
-  const maxComments = getParameter('maxComments') || '5';
+  // retrieve the 'maxComments' value from sessionStorage if a value
+  // has been set. if not, set maxComments to 5
+  const maxComments = sessionStorage.getItem('maxComments') || '5';
   // set the value of the select element to the value supplied by the
   // GET parameter.
   setMaxComments(maxComments);

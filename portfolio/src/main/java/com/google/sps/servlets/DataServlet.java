@@ -70,7 +70,6 @@ public class DataServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
     String title = getParameter(request, "title", "");
     String text = getParameter(request, "text", "");
-    long maxComments = Long.parseLong(getParameter(request, "maxComments", ""));
     long timestamp = System.currentTimeMillis();
     
     /* 
@@ -96,9 +95,7 @@ public class DataServlet extends HttpServlet {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(commentEntity);
 
-    response.sendRedirect(
-      String.format("/index.html?maxComments=%d", maxComments)
-    );
+    response.sendRedirect("/index.html");
   }
 
   /**
