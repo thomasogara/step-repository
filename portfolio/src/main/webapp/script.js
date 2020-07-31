@@ -25,7 +25,7 @@ const slowFillBiography = async () => {
   const output_element = document.getElementById('biography');
   const wait_function = () => (Math.floor(Math.random() * 50) + 50);
   slowFill(output_element, biography_text, wait_function);
-}
+};
 
 /**
  * Fill the text field of a given entity with a given string of text, character
@@ -99,7 +99,7 @@ const slowFill = async (entity, text, wait_function) => {
     */
     entity.innerHTML += '&ensp;';
   }
-}
+};
 
 /**
  * Utility function to allow for any async function to halt
@@ -197,7 +197,60 @@ const loadComments = async (maxComments) => {
 };
 
 /**
- * Load the URL for uploading of the comment form.
+ * @return {boolean} Whether the user is loggged in
+ */
+const checkLoginStatus = async () => {
+  const response = await fetch('/login-status');
+  const responseBody = await response.json();
+  const loggedIn = responseBody.loggedIn; 
+
+  return loggedIn;
+};
+
+/**
+ * Dispaly a login form to the user if they are not logged in.
+ */
+const displayLoginForm = async () => {
+  const loggedIn = await checkLoginStatus();
+
+  if (loggedIn) {
+    // If the user is logged in, hide the login prompt
+    const container = document.getElementById('login-container');
+    container.style['display'] = 'none';
+  } else {
+    // If the user is not logged in, fetch a login link for the user
+    // This login link will send the user to Google's login page,
+    // and will then redirect back to the home page.
+    const login_response = await fetch('/login');
+    const href = await login_response.json();
+    const link = document.getElementById('login-link');
+
+    link.href = href;
+  }
+};
+
+/**
+ * Dispaly a comment form to the user if they are logged in.
+ */
+const displayCommentForm = async () => {
+  const loggedIn = await checkLoginStatus();
+  const commentForm = document.getElementById('comment-form');
+
+  if (loggedIn) {
+    // If the user is logged in,fetch an upload URL from
+    // BlobStore to facilitate form submission.
+    loadFormAction();
+
+    // set the form to validate login status before submission
+    commentForm.onsubmit = commentFormValidator;
+  } else {
+    // If the user is not logged in, hide the comment form
+    commentForm.style['display'] = 'none';
+  }
+};
+
+/**
+ * Load the URL for uploading the comment form.
  */
 const loadFormAction = async () => {
   /*
@@ -232,6 +285,21 @@ const loadCommentImage = async (imageBlobstoreKey) => {
   // to this local resource.
   const imageURL = window.URL.createObjectURL(blob);
   return imageURL;
+};
+
+/**
+ * @return {boolean} Whether the comment form meets the necessary conditions for submission
+ */
+const commentFormValidator = async () => {
+  const loggedIn = await checkLoginStatus();
+  if ( !loggedIn ) {
+    alert('You must login before posting a comment');
+    // If the user is not logged in, return false, preventing form submission
+    return false;
+  } else {
+    // If the user is logged in, return true, allowing form submission
+    return false;
+  }
 };
 
 /**
@@ -273,7 +341,7 @@ const selectionChangeHandler = async (value) => {
   // and reload the comments according to the updated value
   sessionStorage.setItem('maxComments', value);
   loadComments(value);
-}
+};
 
 /**
  * Set the value of the #maxComments element on the page
@@ -299,16 +367,22 @@ const setMaxComments = (value) => {
   }
   maxCommentsElement.selectedIndex = index;
   sessionStorage.setItem('maxComments', maxCommentsElement[index]);
-}
+};
 
 window.onload = async () => {
+  // display login form, if user is not logged in
+  // else, hide the login form
+  displayLoginForm();
+  //display comment form, if the user is logged in,
+  // else, hide the comment form
+  displayCommentForm();
+
   slowFillBiography();
-  loadFormAction();
   // retrieve the 'maxComments' value from sessionStorage if a value
   // has been set. if not, set maxComments to 5
   const maxComments = sessionStorage.getItem('maxComments') || '5';
-  // set the value of the select element to the value supplied by the
-  // GET parameter.
+  // set the value of the select element to the value
+  // supplied by session storage
   setMaxComments(maxComments);
   selectionChangeHandler(maxComments);
-}
+};
