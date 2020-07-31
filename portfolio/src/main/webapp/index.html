@@ -20,6 +20,12 @@
       please see the <a href="gallery.html">gallery page</a> of this
       portfolio
     </p>
+    <div id="login-container">
+      <p>
+        Please <a id="login-link">login</a> if you would like to post
+        a comment.
+      </p>
+    </div>
     <!-- select element allowing the user to specify a max
         number of comments to display on the page -->
     <select type="range" min="0" max="25"
@@ -43,7 +49,8 @@
       <input name="text" id="comment-text"
           type="text" placeholder="Comment Body"
           required="true" minlength="5">
-      <input name="imageURL" type="file" accept="image/*">
+      <input name="imageURL" id="imageURL"
+          type="file" accept="image/*">
       <input type="submit">
     </form>
     <div id="comments">
