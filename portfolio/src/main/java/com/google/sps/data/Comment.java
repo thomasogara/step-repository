@@ -22,12 +22,14 @@ public final class Comment {
   private final String text;
   private final long timestamp;
   private final String imageBlobstoreKey;
+  private final String userEmail;
 
-  public Comment(long id, String title, String text, long timestamp, String imageBlobstoreKey) {
+  public Comment(long id, String title, String text, long timestamp, String imageBlobstoreKey, String userEmail) {
     this.id = id;
     this.title = title;
     this.text = text;
     this.timestamp = timestamp;
     this.imageBlobstoreKey = imageBlobstoreKey;
+    this.userEmail = userEmail;
   }
 }
