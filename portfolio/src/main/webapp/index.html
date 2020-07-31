@@ -1,50 +1,52 @@
 <!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="viewport" content="width=device-width, initial-scale=0.75, hrink-to-fit=no">
   <title>Thomas O'Gara's Step Portfolio</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
   <script src="script.js"></script>
-  <nav id="header" class="navbar navbar-expand-lg navbar-light bg-light"></nav>
-  <div id="content">
-    <img
-        alt="photograph of myself"
-        id="portrait-photo"
-        draggable="false"
-        src="images/domino.jpg"
-        class="img-fluid"
-    />
-    <p id="biography"></p>
-    <p>
-      If you're looking for the projects I completed during my time here,
-      please see the <a href="gallery.html">gallery page</a> of this
-      portfolio
-    </p>
-    <!-- select element allowing the user to specify a max
-        number of comments to display on the page -->
-    <label for="maxComments">Number of comments to display:</label>
-    <select type="range" min="0" max="25"
-        id="maxComments"
-        class="btn btn-mini"
-        onchange="selectionChangeHandler(this.value);"
-    >
-      <option value="5">5</option>
-      <option value="10">10</option>
-      <option value="25">25</option>
-      <option value="-1">All</option>
-    </select>
-    <!--
-      Form action is set in loadFormAction() in script.js
-      The form posts data to the Blobstore API. This API will process
-      any file uploads and forward the processed form onto the /comments route.
-    -->
-    <div class="alert-warning" id="login-container">
+  <nav id="header" class="navbar navbar-light bg-light"></nav>
+  <div class="container">
+    <section id="content" class="col-sm">
+      <img
+          alt="photograph of myself"
+          id="portrait-photo"
+          draggable="false"
+          src="images/domino.jpg"
+          class="img-fluid"
+      />
+      <p id="biography"></p>
       <p>
-        Please <a id="login-link" class="alert-link">login</a> if you would like to post
-        a comment.
+        If you're looking for the projects I completed during my time here,
+        please see the <a href="gallery.html">gallery page</a> of this
+        portfolio
       </p>
-    </div>
-    <section>
+      </section>
+      <section id="comment-section" class="col-sm">
+      <!-- select element allowing the user to specify a max
+          number of comments to display on the page -->
+      <label for="maxComments">Number of comments to display:</label>
+      <select type="range" min="0" max="25"
+          id="maxComments"
+          class="btn btn-mini"
+          onchange="selectionChangeHandler(this.value);"
+      >
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="-1">All</option>
+      </select>
+      <!--
+        Form action is set in loadFormAction() in script.js
+        The form posts data to the Blobstore API. This API will process
+        any file uploads and forward the processed form onto the /comments route.
+      -->
+      <div class="alert-warning" id="login-container">
+        <p>
+          Please <a id="login-link" class="alert-link">login</a> if you would like to post
+          a comment.
+        </p>
+      </div>
       <div id="comments"></div>
       <form method="POST" enctype="multipart/form-data" id="comment-form">
         <h2>Post A Comment</h2>
@@ -67,7 +69,7 @@
           <input type="submit" class="form-control">
         </div>
       </form>
-    </section>
+    </div>
   </div>
   <nav id="footer" class="navbar navbar-light bg-light"></nav>
   <script src="header.js"></script>
