@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Thomas O'Gara's Step Portfolio</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
   <script src="script.js"></script>
+  <nav id="header" class="navbar navbar-expand-lg navbar-light bg-light"></nav>
   <div id="content">
-    <div id="header">
-      <ul id="header-navbar" class="navbar-list"></ul>
-    </div>
     <img
         alt="photograph of myself"
         id="portrait-photo"
         draggable="false"
         src="images/domino.jpg"
+        class="img-fluid"
     />
     <p id="biography"></p>
     <p>
@@ -20,16 +20,12 @@
       please see the <a href="gallery.html">gallery page</a> of this
       portfolio
     </p>
-    <div id="login-container">
-      <p>
-        Please <a id="login-link">login</a> if you would like to post
-        a comment.
-      </p>
-    </div>
     <!-- select element allowing the user to specify a max
         number of comments to display on the page -->
+    <label for="maxComments">Number of comments to display:</label>
     <select type="range" min="0" max="25"
         id="maxComments"
+        class="btn btn-mini"
         onchange="selectionChangeHandler(this.value);"
     >
       <option value="5">5</option>
@@ -42,22 +38,40 @@
       The form posts data to the Blobstore API. This API will process
       any file uploads and forward the processed form onto the /comments route.
     -->
-    <form method="POST" enctype="multipart/form-data" id="comment-form">
-      <input name="title" id="comment-title"
-          type="text" placeholder="Comment Title"
-          required="true" minlength="5">
-      <input name="text" id="comment-text"
-          type="text" placeholder="Comment Body"
-          required="true" minlength="5">
-      <input name="imageURL" id="imageURL"
-          type="file" accept="image/*">
-      <input type="submit">
-    </form>
-    <div id="comments">
+    <div class="alert-warning" id="login-container">
+      <p>
+        Please <a id="login-link" class="alert-link">login</a> if you would like to post
+        a comment.
+      </p>
     </div>
-    <div id="footer">
-      <ul id="footer-navbar" class="navbar-list"></ul>
-    </div>
+    <section>
+      <div id="comments"></div>
+      <form method="POST" enctype="multipart/form-data" id="comment-form">
+        <h2>Post A Comment</h2>
+        <div class="form-group">
+          <input name="title" id="comment-title"
+              type="text" placeholder="Comment Title"
+              required="true" minlength="5"
+              class="form-control">
+          <textarea name="text" id="comment-text"
+              type="text" placeholder="Comment Body"
+              required="true" minlength="5"
+              class="form-control" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <input name="imageURL" id="imageURL"
+              type="file" accept="image/*"
+              class="form-control-file">
+        </div>
+        <div class="form-group">
+          <input type="submit" class="form-control">
+        </div>
+      </form>
+    </section>
   </div>
+  <nav id="footer" class="navbar navbar-light bg-light"></nav>
   <script src="header.js"></script>
   <script src="footer.js"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
