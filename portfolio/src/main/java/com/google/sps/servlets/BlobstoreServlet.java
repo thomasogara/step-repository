@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/** Servlet that returns a programmable number of comments */
+/** Servlet that returns a link for uploading a form to Blobstore for processing */
 @WebServlet("/file-upload")
 public class BlobstoreServlet extends HttpServlet {
 

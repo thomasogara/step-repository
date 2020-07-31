@@ -77,7 +77,8 @@ import javax.servlet.http.HttpServletResponse;
 /** Servlet that returns a programmable number of comments */
 @WebServlet("/comments")
 public class DataServlet extends HttpServlet {
-  private final static int ALL_COMMENTS = -1;
+  private final static int ALL_COMMENTS = Integer.MAX_VALUE;
+  private final static String NO_IMAGE_UPLOAD = "";
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -86,6 +87,12 @@ public class DataServlet extends HttpServlet {
 
     try{
       maxComments = Integer.parseInt(parameterMaxComments);
+      // on the frontend, -1 is used as a flag for displaying all comments
+      // since FetchOptions assumes non-negative limits, this must be
+      // mapped to the backend flag for displaying all comment, ALL_COMMENTS
+      if (maxComments == -1) {
+          maxComments = ALL_COMMENTS;
+      }
     } catch (NumberFormatException ex) {
       // If maxComments parameter is excluded or malformed, return all comments
       maxComments = DataServlet.ALL_COMMENTS;
@@ -118,15 +125,14 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
-    // open a connection to UserService API
+    System.out.println("COMMENT RECEIVED");
     UserService userService = UserServiceFactory.getUserService();
 
     if ( !userService.isUserLoggedIn() ) {
-      final String loginUrl = userService.createLoginURL("/comments");
-      response.sendRedirect(loginUrl);
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return;
     }
-      
+
     String title = getParameter(request, "title", "");
     String text = getParameter(request, "text", "");
     String userEmail = userService.getCurrentUser().getEmail();
