@@ -32,8 +32,13 @@
       <option value="-1">All</option>
     </select>
     <form action="/comments" method="POST">
-      <span>Type your comment here!</span>
-      <input name="text" type="text">
+      <input name="title" id="comment-title"
+          type="text" placeholder="Comment Title"
+          required="true" minlength="5">
+      <input name="text" id="comment-text"
+          type="text" placeholder="Comment Body"
+          required="true" minlength="5">
+      <input type="submit">
       <!-- hidden input element used to shadow select
           element with id #maxComments -->
       <input name="maxComments" type="hidden"
