@@ -20,6 +20,17 @@
       please see the <a href="gallery.html">gallery page</a> of this
       portfolio
     </p>
+    <!-- select element allowing the user to specify a max
+        number of comments to display on the page -->
+    <select type="range" min="0" max="25"
+        id="maxComments"
+        onchange="selectionChangeHandler(this.value);"
+    >
+      <option value="5">5</option>
+      <option value="10">10</option>
+      <option value="25">25</option>
+      <option value="-1">All</option>
+    </select>
     <!--
       Form action is set in loadFormAction() in script.js
       The form posts data to the Blobstore API. This API will process
@@ -34,6 +45,10 @@
           required="true" minlength="5">
       <input name="imageURL" type="file" accept="image/*">
       <input type="submit">
+      <!-- hidden input element used to shadow select
+          element with id #maxComments -->
+      <input name="maxComments" type="hidden"
+          id="hiddenMaxComments">
     </form>
     <div id="comments">
     </div>

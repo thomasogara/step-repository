@@ -18,12 +18,18 @@ package com.google.sps.data;
 public final class Comment {
 
   private final long id;
+  private final String title;
+  private final String imageURL;
   private final String text;
   private final long timestamp;
+  private final long imageBlobstoreId;
 
-  public Comment(long id, String text, long timestamp) {
+  public Comment(long id, String title, String text, String imageURL, long timestamp, long imageBlobstoreId) {
     this.id = id;
+    this.title = title;
     this.text = text;
+    this.imageURL = imageURL;
     this.timestamp = timestamp;
+    this.imageBlobstoreId = imageBlobstoreId;
   }
 }
