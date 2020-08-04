@@ -169,12 +169,11 @@ const loadComments = async (maxComments) => {
     div.appendChild(deleteButton);
     deleteButton.appendChild(trashImage);
 
-    div.classList.add('comment');
-    title.classList.add('comment-title');
-    commentImage.classList.add('comment-image');
-    paragraph.classList.add('comment-body');
-    timestamp.classList.add('comment-timestamp');
-    deleteButton.classList.add('comment-delete-button');
+    commentImage.classList.add('image-fluid');
+    container.style['position'] = 'relative';
+    deleteButton.style['position'] = 'absolute';
+    deleteButton.style['bottom'] = '0';
+    deleteButton.style['right'] = '0';
 
     div.id = comment.id;
     /* If the comment has a title, display it, else use the default message */
