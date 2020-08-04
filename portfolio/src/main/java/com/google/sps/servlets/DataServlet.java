@@ -85,7 +85,7 @@ public class DataServlet extends HttpServlet {
      */
     String WHITESPACE_REGEX = "\\s+";
     
-    /* remove all whitespace from the commentText String */
+    /* remove all whitespace from the text String */
     String commentTextWhitespaceRemoved = text.replaceAll(WHITESPACE_REGEX, "");
     
     /* if the commentText String, with all whitespace removed, is empty, then the comment is rejected */
