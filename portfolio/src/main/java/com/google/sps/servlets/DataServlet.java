@@ -17,8 +17,9 @@ package com.google.sps.servlets;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.gson.Gson;
 import com.google.sps.data.Comment;
@@ -33,24 +34,29 @@ import javax.servlet.http.HttpServletResponse;
 /** Servlet that returns a programmable number of comments */
 @WebServlet("/comments")
 public class DataServlet extends HttpServlet {
+  private final static int ALL_COMMENTS = -1;
+
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    long maxComments = Long.parseLong(request.getParameter("maxComments"));
+    String parameterMaxComments = getParameter(request, "maxComments", "");
+    int maxComments = 0;
 
-    // a value of -1 indicates that ALL comments are wanted
-    if (maxComments == -1) maxComments = Long.MAX_VALUE;
+    try{
+      maxComments = Integer.parseInt(parameterMaxComments);
+    } catch (NumberFormatException ex) {
+      // If maxComments parameter is excluded or malformed, return all comments
+      maxComments = DataServlet.ALL_COMMENTS;
+    }
 
     Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery results = datastore.prepare(query);
+    FetchOptions fetchOptions = FetchOptions.Builder.withLimit(maxComments);
 
     List<Comment> comments = new ArrayList<>();
-    for ( Entity entity : results.asIterable() ) {
-      if (comments.size() >= maxComments ) {
-        break;
-      }
+    for ( Entity entity : results.asIterable(fetchOptions) ) {
       long id = entity.getKey().getId();
       String title = (String) entity.getProperty("title");
       String text = (String) entity.getProperty("text");
@@ -70,7 +76,6 @@ public class DataServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
     String title = getParameter(request, "title", "");
     String text = getParameter(request, "text", "");
-    long maxComments = Long.parseLong(getParameter(request, "maxComments", ""));
     long timestamp = System.currentTimeMillis();
     
     /* 
@@ -81,10 +86,10 @@ public class DataServlet extends HttpServlet {
     String WHITESPACE_REGEX = "\\s+";
     
     /* remove all whitespace from the commentText String */
-    String commentTextWhitespaceRemoved = commentText.replaceAll(WHITESPACE_REGEX, "");
+    String commentTextWhitespaceRemoved = text.replaceAll(WHITESPACE_REGEX, "");
     
     /* if the commentText String, with all whitespace removed, is empty, then the comment is rejected */
-    if (commentTextWhiteSpaceRemoved.equals("")) {
+    if (commentTextWhitespaceRemoved.equals("")) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
     }
 
@@ -96,9 +101,7 @@ public class DataServlet extends HttpServlet {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(commentEntity);
 
-    response.sendRedirect(
-      String.format("/index.html?maxComments=%d", maxComments)
-    );
+    response.sendRedirect("/index.html");
   }
 
   /**
