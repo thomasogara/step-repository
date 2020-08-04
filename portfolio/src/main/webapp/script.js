@@ -130,10 +130,23 @@ const loadComments = async (maxComments) => {
   comments.map((comment) => {
     const div = document.createElement('div');
     const paragraph = document.createElement('p');
+    const title = document.createElement('h3');
+    const timestamp = document.createElement('span');
+
     container.appendChild(div);
+    div.appendChild(title);
     div.appendChild(paragraph);
+    div.appendChild(timestamp);
+
+    div.classList.add('comment');
+    title.classList.add('comment-title');
+    paragraph.classList.add('comment-body');
+    timestamp.classList.add('comment-timestamp');
+    
     div.id = comment.id;
-    paragraph.innerText = `[${comment.timestamp}]: ${comment.text}`;
+    title.innerText = comment.title;
+    paragraph.innerText = comment.text;
+    timestamp.innerText = new Date(comment.timestamp).toLocaleString();
   });
 }
 
@@ -143,23 +156,45 @@ const loadComments = async (maxComments) => {
  * @param{Number} value The current value of the select element
  */
 const selectionChangeHandler = async (value) => {
-  // #hiddenMaxComments is a hidden input entry in the form on the home page.
-  // it is a shadow of the select element, and is submitted along with the form.
-  // it will be used in the functionality of a later update.
-  const formMaxCommentsElement = document.getElementById('hiddenMaxComments');
-  formMaxCommentsElement.value = value;
-
-  // once #hiddenMaxComments has been updated, reload the comments according to
-  // the updated value of the select element
+  // update the value of maxComments in the session storage,
+  // and reload the comments according to the updated value
+  sessionStorage.setItem('maxComments', value);
   loadComments(value);
+}
+
+/**
+ * Set the value of the #maxComments element on the page
+ * @param{Number} value The value to be assigned
+ */
+const setMaxComments = (value) => {
+  const maxCommentsElement = document.getElementById('maxComments');
+  const selectedIndex = maxCommentsElement.selectedIndex;
+  // constructing the optionValues[] array in this way is required as
+  // maxCommentsElement.options is an HTMLCollection object, and does not
+  // have a .indexOf() function
+  const optionValues = [];
+  for (let option of maxCommentsElement.options) {
+    optionValues.push(option.value);
+  }
+  let index = optionValues.indexOf(value);
+  // .indexOf() will return -1 if the item is not present in the array
+  const notFound = -1;
+  // if the passed value is not a valid option (not found in options array), set the value to 5
+  if (index === notFound) {
+    // option with value 5 is stored at index 0
+    index = 0;
+  }
+  maxCommentsElement.selectedIndex = index;
+  sessionStorage.setItem('maxComments', maxCommentsElement[index]);
 }
 
 window.onload = async () => {
   slowFillBiography();
-  // retrieve the 'maxComments' GET parameter from the URL string
-  // and use it to only load the requested number of comments on page load.
-  const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
-  const maxComments = urlParams.get('maxComments') || '-1';
-  loadComments(maxComments);
+  // retrieve the 'maxComments' value from sessionStorage if a value
+  // has been set. if not, set maxComments to 5
+  const maxComments = sessionStorage.getItem('maxComments') || '5';
+  // set the value of the select element to the value supplied by the
+  // GET parameter.
+  setMaxComments(maxComments);
+  selectionChangeHandler(maxComments);
 }
