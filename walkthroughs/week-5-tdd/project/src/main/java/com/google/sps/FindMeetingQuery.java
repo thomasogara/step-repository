@@ -37,6 +37,7 @@ public final class FindMeetingQuery {
     * attendees, and optional attendees are included here.
     */
   public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
+    System.out.println("========================");
     // There must be a list of events
     if ( events == null ) {
       throw new IllegalArgumentException("\'events\' parameter cannot be null");
@@ -59,197 +60,113 @@ public final class FindMeetingQuery {
     // Extract the meeting duration from the request
     final long duration = request.getDuration();
 
-    // Sort the events based on their start time.
-    final List<Event> sortedEvents = sortEvents(events);
-    
-    // 
-    final List<TimeRange> sortedUnavailableTimeRanges =
-        getUnavailableTimeRanges(sortedEvents);
+    final List<TimeRange> availableTimeRanges = getAvailableTimeRanges(events, duration);
 
-    final List<TimeRange> squashedUnavailableTimeRanges = 
-        squashTimeRanges(sortedUnavailableTimeRanges);
-
-    final List<TimeRange> availableTimes = getAvailableTimes(squashedUnavailableTimeRanges, duration);
-
-    return availableTimes;
+    return availableTimeRanges;
   }
 
   /**
-   * Sort a list of events in ascending order on the basis of their start times.
-   * @param events The Collection of Events to be sorted
-   * @return A sorted List of Events
+   * Get all available TimeRanges for this meeting request. Optional
+   * attendees are not considered.
+   * @param events The list of all Events on the day the request.
+   * @return A List of TimeRanges which are available to schedule this meeting
+   * request.
    */
-  private List<Event> sortEvents(Collection<Event> events) {
-    final List<Event> sortedEvents = new LinkedList<Event>(events);
-    Collections.sort(
-        sortedEvents,
-        (a, b) -> TimeRange.ORDER_BY_START.compare(a.getWhen(), b.getWhen())
-    );
-    return sortedEvents;
-  }
+  private List<TimeRange> getAvailableTimeRanges(Collection<Event> events, long duration) {
+    /* The list of available TimeRanges to be constructed */
+    final LinkedList<TimeRange> availableTimeRanges = new LinkedList();
 
-  /**
-   * Get all of the unavailable TimeRanges on the day of the request.
-   * @param events The list of all events happening on the day of the request
-   * @return A List of TimeRanges during which all attendees are unavailable.
-   */
-  private List<TimeRange> getUnavailableTimeRanges(List<Event> events){
-    return events.
-        stream()
-            /* Filter out any events which have no attendees in common
+    /*
+     * Create a List of unavailable TimeRanges from the List of Events
+     * and the List of Attendees provided.
+     */
+    final List<TimeRange> unavailableTimeRanges =
+        events.stream()
+            /* 
+             * Filter out all events which do not have any common attendees
              * with this meeting request
              */
-            .filter(event -> filterNoRelevantAttendees(event))
-                /* Extract the TimeRange from the Event.
-                 * From this point forward, the other members of the Event
-                 * do not influence the decision process.
-                 */
-                .map(event -> event.getWhen())
-                  /* Collect the stream into a List */
-                  .collect(Collectors.toList());
-  }
+            .filter(event -> anyMatchingAttendees(event.getAttendees()))
+              .map(event -> event.getWhen())
+                .collect(Collectors.toList());
 
-  /**
-   * Predicate function returning true if an event has at least one attendee
-   * in common with the attendees of the meeting request, false otherwise.
-   * @param event The event to be tested against the predicate.
-   */
-  private boolean filterNoRelevantAttendees(Event event) {
-    return event.getAttendees()
-        .stream()
-            /* If any of the attendees of this event appear in the attendee
-            list of the meeting request, return true. Otherwise, false. */
-            .anyMatch(attendee -> this.attendees.contains(attendee));
-  }
-
-  /**
-   * Squash a List of TimeRanges together so that all consecutive overlapping
-   * and/or nested events are reformatted as a single TimeRange.
-   * @param events The list of events to be squashed.
-   * @return A List of TimeRanges, where none of the ranges have an
-   * intersection with any other.
-   */
-  private List<TimeRange> squashTimeRanges(List<TimeRange> events) {
-    /* The list to be constructed */
-    final LinkedList<TimeRange> squashedEvents = new LinkedList();
-
-    final ListIterator<TimeRange> i = events.listIterator();
-
-    /* Iterate over the list of events for as long as there are events yet to
-     * be processed.
+    final HashSet<Integer> unavailableMinutes = new HashSet<Integer>();
+    
+    /*
+     * Iterate over the unavailable TimeRanges, and create a Set of all
+     * unavailable minutes on the day of the meeting. This Set is used to
+     * check whether any given minute is available for scheduling a meeting.
      */
-    while ( i.hasNext() ) {
-      // The first event in the current sequence of events
-      final TimeRange first = i.next();
-
-      // The last event in the current sequence of events
-      TimeRange last = null;
-
-      // Iterate over the TimeRanges, while there is another TimeRange
-      // in the list that might be in this sequence.
-      while ( i.hasNext() ) {
-        // Append the next TimeRange to the current sequence.
-        last = i.next();
-
-        // If this TimeRange is in the sequence, continue.
-        if (
-            first.contains(last)
-            || first.overlaps(last)
-        ) {
-          continue;
-        } 
-        // If this TimeRange is not in the sequence, backtrack, and remove it from the sequence.
-        else {
-          // Reverse the cursor to remove this TimeRange from the current sequence.
-          i.previous();
-          // Set last to point at the last valid TimeRange in the current sequence.
-          // Th
-          last = i.previous();
-          // Advance the cursor to point at this TimeRange, which will be
-          // included in the next sequence.
-          i.next();
-          // Leave the loop, as the end of the sequence has been identified.
-          break;
-        }
+    for ( TimeRange range : unavailableTimeRanges ) {
+      for ( int i = range.start(); i < range.end(); i++ ) {
+        unavailableMinutes.add(i);
       }
+    }
+    
+    /* Initialise a counter variable */
+    int i = TimeRange.START_OF_DAY;
 
-      // A TimeRange representing the current sequence of TimeRanges, squashed into a single TimeRange
-      TimeRange squashed = null;
+    /*
+     * Iterate for as long as there still exists another minute of the current
+     * day that has not been queried for availability.
+     */
+    while ( i <= TimeRange.END_OF_DAY ) {
+      /* The first minute of the current span of available time */
+      int first = i;
+      /* The last minute of the current span of available time */
+      int last = i;
 
       /*
-       * If the sequence has a length greater than 1, then the sequence must 
-       * be constructed to span from the start of the first TimeRange in the
-       * sequence to the end of the last TimeRange in the sequence.
+       * Extend the upper bound of the current span of available time, until it
+       * reaches an unavailable minute.
        */
-      if (last != null && !first.equals(last)) {
-        squashed = TimeRange.fromStartEnd(
-          /* The squashed TimeRange begins as the start of the first TimeRange
-           * in the sequence
-           */
-          first.start(),
-          /* The squashed TimeRange finishes at the end of the greater of the
-           * end of the first and last TimeRange.
-           * Choosing the greater of these two ensures that nested events are
-           * handled correctly.
-           * For Example:
-           *        |----A----|
-           *          |--B--| ^
-           *                ^
-           * In this example, the end of the 'last' event (B) is before
-           * the end of the 'first' event (A).
-           */
-          Math.max(first.end(), last.end()),
-          false);
-      } 
-      /*
-       * If the sequence has a length of 1, then the sequence is equal to the
-       * first TimeRange in the sequence.
-       */
-      else {
-        squashed = first;
+      while ( i <= TimeRange.END_OF_DAY && !unavailableMinutes.contains(last) ) {
+        i++;
+        last = i;
       }
 
-      // Append the current sequence to the list of squashed events
-      squashedEvents.add(squashed);
+      /*
+       * The value of the variable i must be incremented after the discovery of
+       * an unavailable minute. If i were not incremented, the program
+       * logic would never continue past the first unavailable minute
+       * encountered and would enter an infinite loop.
+       */
+      i++;
+
+      /*
+       * If we have found a span of available time whose length is greater than
+       * the necessary duration for the meeting requested, then create a
+       * TimeRange to represent this available time slot.
+       */
+
+      // The length of the discovered span of available time.
+      int spanLength = last - first;
+
+      if ( spanLength >= duration ) {
+        availableTimeRanges.add(
+            TimeRange.fromStartEnd(
+              first,
+              last,
+              false
+            )
+        );
+      }
     }
 
-    return squashedEvents;
+    return availableTimeRanges;
   }
 
   /**
-   * Get all of the TimeRanges during which all meeting attendees are available.
-   * @param squashedUnavailableTimeRanges A List of TimeRanges, during each of
-   * which at least one meeting attendee is unavailable. This list MUST be
-   * sorted, and all TimeRanges MUST be mutually exclusive.
-   * @return A List of TimeRanges during which all meeting attendees are
-   * available.
+   * Returns true if any of the attendees of a given event are on the list of
+   * attendees for this meeting request. Does not take optional attendees into
+   * account.
+   * @param eventAttendees The attendees of the event to be tested.
+   * @return Whether there is any intersection between the event's
+   * attendees, and the attendees for this meeting request.
    */
-  private List<TimeRange> getAvailableTimes(List<TimeRange> squashedUnavailableTimeRanges, long duration) {
-    LinkedList<TimeRange> availableTimes = new LinkedList<TimeRange>();
-    int lastUnavailableEndTime = TimeRange.START_OF_DAY;
-    for (TimeRange unavailableTimeRange : squashedUnavailableTimeRanges) {
-      final TimeRange available = 
-          TimeRange.fromStartEnd(
-              lastUnavailableEndTime,
-              unavailableTimeRange.start(),
-              false
-          );
-      if (available.duration() >= duration) {
-        availableTimes.add(available);
-      }
-      lastUnavailableEndTime = unavailableTimeRange.end();
-    }
-
-    if (lastUnavailableEndTime != TimeRange.END_OF_DAY + 1) {
-      availableTimes.add(
-          TimeRange.fromStartEnd(
-              lastUnavailableEndTime,
-              TimeRange.END_OF_DAY,
-              true
-          )
-      );
-    }
-
-    return availableTimes;
+  private boolean anyMatchingAttendees(Collection<String> eventAttendees) {
+    return this.attendees
+        .stream()
+            .anyMatch(attendee -> eventAttendees.contains(attendee));
   }
 }
