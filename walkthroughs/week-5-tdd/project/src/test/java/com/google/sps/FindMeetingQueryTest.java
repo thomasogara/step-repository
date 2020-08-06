@@ -122,6 +122,81 @@ public final class FindMeetingQueryTest {
   }
 
   @Test
+  public void unavailableOptionalAttendeeIsIgnored() {
+    // Have each of A and B have different events. A and B are both mandatory
+    // attendees of the request.
+    // Have C have an all-day event. C is an optional attendee.
+    // We should see 3 options, identical to everyAttendeeIsConsidered()
+    // Events  :       |--A--|     |--B--|
+    //         : |--------------C--------------|
+    // Day     : |-----------------------------|
+    // Options : |--1--|     |--2--|     |--3--|
+
+    String PERSON_C = "Person C";
+
+    Collection<Event> events = Arrays.asList(
+        new Event("Event 1",
+            TimeRange.fromStartDuration(TIME_0800AM, DURATION_30_MINUTES),
+            Arrays.asList(PERSON_A)),
+        new Event("Event 2", 
+            TimeRange.fromStartDuration(TIME_0900AM, DURATION_30_MINUTES),
+            Arrays.asList(PERSON_B)),
+        new Event("Event 3",
+            TimeRange.WHOLE_DAY,
+            Arrays.asList(PERSON_C))
+    );
+
+    MeetingRequest request =
+        new MeetingRequest(Arrays.asList(PERSON_A, PERSON_B), DURATION_30_MINUTES);
+    request.addOptionalAttendee(PERSON_C);
+
+    Collection<TimeRange> actual = query.query(events, request);
+    Collection<TimeRange> expected =
+        Arrays.asList(TimeRange.fromStartEnd(TimeRange.START_OF_DAY, TIME_0800AM, false),
+            TimeRange.fromStartEnd(TIME_0830AM, TIME_0900AM, false),
+            TimeRange.fromStartEnd(TIME_0930AM, TimeRange.END_OF_DAY, true));
+
+    Assert.assertEquals(expected, actual);
+  }
+
+  @Test
+  public void availableOptionalAttendeeIsConsidered() {
+    // Have each of A and B have different events. A and B are both mandatory
+    // attendees of the request.
+    // Have C have an event between A's and B's. C is an optional attendee.
+    // We should see 2 options, in the early and late parts of the day.
+    // Events  :       |--A--|     |--B--|
+    //         :             |--C--|
+    // Day     : |-----------------------------|
+    // Options : |--1--|                 |--3--|
+
+    String PERSON_C = "Person C";
+
+    Collection<Event> events = Arrays.asList(
+        new Event("Event 1",
+            TimeRange.fromStartDuration(TIME_0800AM, DURATION_30_MINUTES),
+            Arrays.asList(PERSON_A)),
+        new Event("Event 2",
+            TimeRange.fromStartDuration(TIME_0900AM, DURATION_30_MINUTES),
+            Arrays.asList(PERSON_B)),
+        new Event("Event 3",
+            TimeRange.fromStartDuration(TIME_0830AM, DURATION_30_MINUTES),
+            Arrays.asList(PERSON_C))
+    );
+
+    MeetingRequest request =
+        new MeetingRequest(Arrays.asList(PERSON_A, PERSON_B), DURATION_30_MINUTES);
+    request.addOptionalAttendee(PERSON_C);
+
+    Collection<TimeRange> actual = query.query(events, request);
+    Collection<TimeRange> expected =
+        Arrays.asList(TimeRange.fromStartEnd(TimeRange.START_OF_DAY, TIME_0800AM, false),
+            TimeRange.fromStartEnd(TIME_0930AM, TimeRange.END_OF_DAY, true));
+
+    Assert.assertEquals(expected, actual);
+  }
+
+  @Test
   public void overlappingEvents() {
     // Have an event for each person, but have their events overlap. We should only see two options.
     //
@@ -146,6 +221,8 @@ public final class FindMeetingQueryTest {
 
     Assert.assertEquals(expected, actual);
   }
+
+  
 
   @Test
   public void nestedEvents() {
