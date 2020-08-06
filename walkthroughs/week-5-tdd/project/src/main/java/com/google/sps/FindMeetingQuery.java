@@ -25,8 +25,6 @@ import java.util.LinkedList;
 import java.util.Collections;
 
 public final class FindMeetingQuery {
-  private Collection<String> attendees;
-
   /**
     * Find all suitable spans of time during which the given meeting request can
     * be fulfilled, with the given list of attendees' daily events being
@@ -37,7 +35,6 @@ public final class FindMeetingQuery {
     * attendees, and optional attendees are included here.
     */
   public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
-    System.out.println("========================");
     // There must be a list of events
     if ( events == null ) {
       throw new IllegalArgumentException("\'events\' parameter cannot be null");
@@ -52,17 +49,17 @@ public final class FindMeetingQuery {
     }
     // The duration must not exceed one day
     if ( request.getDuration() > TimeRange.WHOLE_DAY.duration() ) {
+      // returning an empty list in the case of a request that exceeds 1 day's
+      // duration is encoded in the test noOptionsForTooLongOfARequest()
       return new LinkedList<TimeRange>();
     }
 
-    // Extract the list of attendees from the request (unmodifiable)
-    this.attendees = request.getAttendees();
-    // Extract the meeting duration from the request
-    final long duration = request.getDuration();
+    final List<TimeRange> availableTimeRanges = getAvailableTimeRanges(events, request);
 
-    final List<TimeRange> availableTimeRanges = getAvailableTimeRanges(events, duration);
+    final List<TimeRange> chosenTimeRanges =
+        chooseTimeRanges(events, request, availableTimeRanges);
 
-    return availableTimeRanges;
+    return chosenTimeRanges;
   }
 
   /**
@@ -72,7 +69,7 @@ public final class FindMeetingQuery {
    * @return A List of TimeRanges which are available to schedule this meeting
    * request.
    */
-  private List<TimeRange> getAvailableTimeRanges(Collection<Event> events, long duration) {
+  private List<TimeRange> getAvailableTimeRanges(Collection<Event> events, MeetingRequest request) {
     /* The list of available TimeRanges to be constructed */
     final LinkedList<TimeRange> availableTimeRanges = new LinkedList();
 
@@ -80,24 +77,24 @@ public final class FindMeetingQuery {
      * Create a List of unavailable TimeRanges from the List of Events
      * and the List of Attendees provided.
      */
-    final List<TimeRange> unavailableTimeRanges =
+    final List<Event> unavailableEventsWithoutOptsConsidered =
         events.stream()
             /* 
              * Filter out all events which do not have any common attendees
-             * with this meeting request
+             * with this meeting request.
              */
-            .filter(event -> anyMatchingAttendees(event.getAttendees()))
-              .map(event -> event.getWhen())
+            .filter(event -> anyIntersection(request.getAttendees(), event.getAttendees()))
                 .collect(Collectors.toList());
 
     final HashSet<Integer> unavailableMinutes = new HashSet<Integer>();
     
     /*
-     * Iterate over the unavailable TimeRanges, and create a Set of all
+     * Iterate over the unavailable Events, and create a Set of all
      * unavailable minutes on the day of the meeting. This Set is used to
      * check whether any given minute is available for scheduling a meeting.
      */
-    for ( TimeRange range : unavailableTimeRanges ) {
+    for ( Event event : unavailableEventsWithoutOptsConsidered ) {
+      final TimeRange range = event.getWhen();
       for ( int i = range.start(); i < range.end(); i++ ) {
         unavailableMinutes.add(i);
       }
@@ -133,16 +130,16 @@ public final class FindMeetingQuery {
        */
       i++;
 
+      // The length of the discovered span of available time.
+      int spanLength = last - first;
+
+
       /*
        * If we have found a span of available time whose length is greater than
        * the necessary duration for the meeting requested, then create a
        * TimeRange to represent this available time slot.
        */
-
-      // The length of the discovered span of available time.
-      int spanLength = last - first;
-
-      if ( spanLength >= duration ) {
+      if ( spanLength >= request.getDuration() ) {
         availableTimeRanges.add(
             TimeRange.fromStartEnd(
               first,
@@ -157,16 +154,65 @@ public final class FindMeetingQuery {
   }
 
   /**
-   * Returns true if any of the attendees of a given event are on the list of
-   * attendees for this meeting request. Does not take optional attendees into
-   * account.
-   * @param eventAttendees The attendees of the event to be tested.
-   * @return Whether there is any intersection between the event's
-   * attendees, and the attendees for this meeting request.
+   * 
    */
-  private boolean anyMatchingAttendees(Collection<String> eventAttendees) {
-    return this.attendees
+  private List<TimeRange> chooseTimeRanges(Collection<Event> events, MeetingRequest request, List<TimeRange> availableTimeRanges) {
+    List<TimeRange> unavailableTimeRangesForOpts =
+        getUnavailableTimeRangesForOpts(events, request);
+
+    List<TimeRange> availableTimeRangesWithOptsConsidered = 
+        availableTimeRanges
+            .stream()
+                .filter(range -> !schedulingConflict(unavailableTimeRangesForOpts, range))
+                    .collect(Collectors.toList());
+
+    if ( !availableTimeRangesWithOptsConsidered.isEmpty() ) {
+      return availableTimeRangesWithOptsConsidered;
+    } else {
+      return availableTimeRanges;
+    }
+  }
+
+  private List<TimeRange> getUnavailableTimeRangesForOpts(Collection<Event> events, MeetingRequest request) {
+    return events
         .stream()
-            .anyMatch(attendee -> eventAttendees.contains(attendee));
+          .filter(
+              event -> 
+                  anyIntersection(
+                      request.getOptionalAttendees(),
+                      event.getAttendees()
+                  )
+          )
+              .map(event -> event.getWhen())
+                  .collect(Collectors.toList());
+  }
+
+  /**
+   * Returns true if there are any common elements between two Collections.
+   * Ordering of the parameters does not matter.
+   * @param eventAttendees The attendees of the event to be tested.
+   * @return Whether there is any intersection between the elements of two
+   * Collections.
+   */
+  private boolean anyIntersection(Collection collectionA, Collection collectionB) {
+    return collectionA
+        .stream()
+            .anyMatch(element -> collectionB.contains(element));
+  }
+
+  /**
+   * Return true if the provided TimeRange is NOT available, according to the
+   * Collection of unavailable TimeRanges provided.
+   * @param unavailableTimeRanges The Collection of TimeRanges which are 
+   * unavailable.
+   * @param range The TimeRange to be tested for availability.
+   * @return Whether inserting {@code range} into a calendar alongside all
+   * the TimeRanges in {@code unavailableTimeRanges} would cause a scheduling
+   * conflict.
+   */
+  private boolean schedulingConflict(Collection<TimeRange> unavailableTimeRanges, TimeRange range) {
+    return unavailableTimeRanges
+        .stream()
+            .anyMatch(unavailableRange -> range.overlaps(unavailableRange));
   }
 }
