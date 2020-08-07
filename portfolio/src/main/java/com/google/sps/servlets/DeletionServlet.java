@@ -59,14 +59,22 @@ public class DeletionServlet extends HttpServlet {
 
     // Initialise a connection to DataStore.
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    BlobstoreService blobstore = BlobstoreServiceFactory.getBlobstoreService();
 
     // Each key has a unique id associated with it.
     // This id can be used to reconstruct the key using .createKey()
     Key key = KeyFactory.createKey("Comment", body.getId());
-    BlobKey blobKey = new BlobKey(body.getImageBlobstoreKey());
 
     datastore.delete(key);
+
+    // Initialise a connection to Blobstore
+    BlobstoreService blobstore = BlobstoreServiceFactory.getBlobstoreService();
+
+    // Create a BlobKey from the provided BlobKey String
+    // In case of an invalid or non-existent BlobKey, the servlet will quit.
+    // This is expected, as some comments don't have images but should still
+    // be viable for deletion.
+    BlobKey blobKey = new BlobKey(body.getImageBlobstoreKey());
+
     blobstore.delete(blobKey);
   }
 
