@@ -31,13 +31,19 @@
       <option value="25">25</option>
       <option value="-1">All</option>
     </select>
-    <form action="/comments" method="POST">
+    <!--
+      Form action is set in loadFormAction() in script.js
+      The form posts data to the Blobstore API. This API will process
+      any file uploads and forward the processed form onto the /comments route.
+    -->
+    <form method="POST" enctype="multipart/form-data" id="comment-form">
       <input name="title" id="comment-title"
           type="text" placeholder="Comment Title"
           required="true" minlength="5">
       <input name="text" id="comment-text"
           type="text" placeholder="Comment Body"
           required="true" minlength="5">
+      <input name="imageURL" type="file" accept="image/*">
       <input type="submit">
       <!-- hidden input element used to shadow select
           element with id #maxComments -->
