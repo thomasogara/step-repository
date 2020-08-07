@@ -21,15 +21,13 @@ public final class Comment {
   private final String title;
   private final String text;
   private final long timestamp;
-  private final String imageURL;
   private final String imageBlobstoreKey;
 
-  public Comment(long id, String title, String text, long timestamp, String imageURL, String imageBlobstoreKey) {
+  public Comment(long id, String title, String text, long timestamp, String imageBlobstoreKey) {
     this.id = id;
     this.title = title;
     this.text = text;
     this.timestamp = timestamp;
-    this.imageURL = imageURL;
     this.imageBlobstoreKey = imageBlobstoreKey;
   }
 }
