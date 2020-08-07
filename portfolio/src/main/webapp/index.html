@@ -7,14 +7,14 @@
   <link rel="stylesheet" href="style.css">
   <script src="script.js"></script>
   <nav id="header" class="navbar navbar-light bg-light"></nav>
-  <div class="container">
+  <section class="container">
     <section id="content" class="col-sm">
       <img
-          alt="photograph of myself"
-          id="portrait-photo"
-          draggable="false"
-          src="images/domino.jpg"
-          class="img-fluid"
+              alt="photograph of myself"
+              id="portrait-photo"
+              draggable="false"
+              src="images/domino.jpg"
+              class="img-fluid"
       />
       <p id="biography"></p>
       <p>
@@ -22,15 +22,15 @@
         please see the <a href="gallery.html">gallery page</a> of this
         portfolio
       </p>
-      </section>
-      <section id="comment-section" class="col-sm">
+    </section>
+    <section id="comment-section" class="col-sm">
       <!-- select element allowing the user to specify a max
           number of comments to display on the page -->
       <label for="maxComments">Number of comments to display:</label>
       <select type="range" min="0" max="25"
-          id="maxComments"
-          class="btn btn-mini"
-          onchange="selectionChangeHandler(this.value);"
+              id="maxComments"
+              class="btn btn-mini"
+              onchange="selectionChangeHandler(this.value);"
       >
         <option value="5">5</option>
         <option value="10">10</option>
@@ -53,25 +53,25 @@
         <h2>Post A Comment</h2>
         <div class="form-group">
           <input name="title" id="comment-title"
-              type="text" placeholder="Comment Title"
-              required="true" minlength="5"
-              class="form-control">
+                 type="text" placeholder="Comment Title"
+                 required minlength="5"
+                 class="form-control">
           <textarea name="text" id="comment-text"
-              type="text" placeholder="Comment Body"
-              required="true" minlength="5"
-              class="form-control" rows="3"></textarea>
+                    placeholder="Comment Body"
+                    required minlength="5"
+                    class="form-control" rows="3"></textarea>
         </div>
         <div class="form-group">
           <input name="imageURL" id="imageURL"
-              type="file" accept="image/*"
-              class="form-control-file">
+                 type="file" accept="image/*"
+                 class="form-control-file">
         </div>
         <div class="form-group">
           <input type="submit" class="form-control">
         </div>
       </form>
-    </div>
-  </div>
+    </section>
+  </section>
   <nav id="footer" class="navbar navbar-light bg-light"></nav>
   <script src="header.js"></script>
   <script src="footer.js"></script>
