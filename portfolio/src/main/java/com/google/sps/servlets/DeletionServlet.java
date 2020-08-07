@@ -105,13 +105,5 @@ public class DeletionServlet extends HttpServlet {
     public String getImageBlobstoreKey() {
         return this.imageBlobstoreKey;
     }
-
-    public String toString() {
-      return String.format(
-          "DeletionRequestBody{ id=\"%d\", imageBlobstoreKey = %s }",
-          this.id,
-          this.imageBlobstoreKey
-      );
-    }
   }
 }
