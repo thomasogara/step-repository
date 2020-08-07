@@ -14,11 +14,12 @@
 
 package com.google.sps;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.stream.Collectors;
-import java.util.List;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public final class FindMeetingQuery {
   /**
@@ -47,59 +48,124 @@ public final class FindMeetingQuery {
     if (request.getDuration() > TimeRange.WHOLE_DAY.duration()) {
       // returning an empty list in the case of a request that exceeds 1 day's
       // duration is encoded in the test noOptionsForTooLongOfARequest()
-      return new LinkedList<TimeRange>();
+      return new LinkedList<>();
     }
 
-    final List<TimeRange> availableTimeRanges = getAvailableTimeRanges(events, request);
+    /* Initially, the entire day is available for the scheduling of the request */
+    final TimeRange WHOLE_DAY =
+            TimeRange.fromStartEnd(TimeRange.START_OF_DAY, TimeRange.END_OF_DAY, true);
 
-    return chooseTimeRanges(events, request, availableTimeRanges);
+    /* Find all TimeRanges during which the attendees are all available for a meeting */
+    final List<TimeRange> availableTimeRanges =
+            schedule(events, request, Arrays.asList(WHOLE_DAY), request.getAttendees());
+
+    /* Search through the TimeRanges during which the attendees are all available for a meeting,
+     * and identify the TimeRanges within those, during which optional attendees are also available for
+     * a meeting, using the same algorithm as before. */
+    final List<TimeRange> availableTimeRangesWithOptsConsidered =
+            schedule(events, request, availableTimeRanges, request.getOptionalAttendees());
+
+    /* If possible, invite optional attendees. If not, exclude them. */
+    if (!availableTimeRangesWithOptsConsidered.isEmpty()) {
+      return availableTimeRangesWithOptsConsidered;
+    } else {
+      return availableTimeRanges;
+    }
   }
 
   /**
-   * Get all available TimeRanges for this meeting request. Optional attendees are not considered.
+   * Schedule a meeting with the provided constraints.
    *
-   * @param events The list of all Events on the day the request.
-   * @return A List of TimeRanges which are available to schedule this meeting request.
+   * @param events              All events on the day of the request.
+   * @param request             The request being made.
+   * @param availableTimeRanges The TimeRanges during which the event can be scheduled.
+   * @param attendees           The list of attendees to be invited to the event.
+   * @return A List of TimeRanges during which the requested meeting can be held, with all provided
+   * constraints taken into account.
    */
-  private List<TimeRange> getAvailableTimeRanges(Collection<Event> events, MeetingRequest request) {
-    /* The list of available TimeRanges to be constructed */
-    final LinkedList<TimeRange> availableTimeRanges = new LinkedList<>();
+  private List<TimeRange> schedule(
+          Collection<Event> events,
+          MeetingRequest request,
+          List<TimeRange> availableTimeRanges,
+          Collection<String> attendees) {
+    /* Create a List of unavailable TimeRanges during which the provided attendees cannot be scheduled for a meeting. */
+    final List<TimeRange> unavailableTimeRanges = getUnavailableTimeRanges(events, attendees);
+
+    /* Create a Set of all minutes of the day during which the provided attendees cannot be scheduled for a meeting */
+    final HashSet<Integer> unavailableMinutes = getUnavailableMinutes(unavailableTimeRanges);
+
+    final List<TimeRange> splitRanges = new LinkedList<>();
 
     /*
-     * Create a List of unavailable TimeRanges from the List of Events
-     * and the List of Attendees provided.
+     * Split all of the available TimeRanges, with the following constraints:
+     * - All TimeRanges must be long enough to accommodate the meeting.
+     * - All attendees provided must be available for the TimeRange.
+     * - All adjacent TimeRanges must be merged into a single TimeRange.
+     *
+     * This will produce a List of TimeRanges which are suggested as the times for the requested meeting.
      */
-    final List<Event> unavailableEventsWithoutOptsConsidered =
-        events.stream()
-            /*
-             * Filter out all events which do not have any common attendees
-             * with this meeting request.
-             */
-            .filter(event -> anyIntersection(request.getAttendees(), event.getAttendees()))
-            .collect(Collectors.toList());
+    for (TimeRange range : availableTimeRanges) {
+      splitRanges.addAll(splitRange(range, unavailableMinutes, request.getDuration()));
+    }
 
-    final HashSet<Integer> unavailableMinutes = new HashSet<>();
+    return splitRanges;
+  }
 
+  /**
+   * Get all of the minutes of the day during which at least one attendee is unavailable, using the
+   * list of unavailable TimeRanges provided.
+   *
+   * @param unavailableTimeRanges A List of TimeRanges during which at least one attendee is
+   *                              unavailable to attend a meeting.
+   * @return A HashSet of integers containing all minutes of the day during which at least one
+   * attendee is unavailable.
+   */
+  private HashSet<Integer> getUnavailableMinutes(Collection<TimeRange> unavailableTimeRanges) {
+    HashSet<Integer> unavailableMinutes = new HashSet<>();
     /*
      * Iterate over the unavailable Events, and create a Set of all
      * unavailable minutes on the day of the meeting. This Set is used to
      * check whether any given minute is available for scheduling a meeting.
      */
-    for (Event event : unavailableEventsWithoutOptsConsidered) {
-      final TimeRange range = event.getWhen();
+    for (TimeRange range : unavailableTimeRanges) {
       for (int i = range.start(); i < range.end(); i++) {
         unavailableMinutes.add(i);
       }
     }
 
+    return unavailableMinutes;
+  }
+
+  /**
+   * Get all of the TimeRanges during which at least one attendee is unavailable.
+   *
+   * @param events    The events on the day of the request
+   * @param attendees The attendees of the meeting.
+   * @return A
+   */
+  private List<TimeRange> getUnavailableTimeRanges(
+          Collection<Event> events, Collection<String> attendees) {
+    return events.stream()
+            /*
+             * Filter out all events which do not have any common attendees
+             * with this meeting request.
+             */
+            .filter(event -> anyIntersection(attendees, event.getAttendees()))
+            .map(Event::getWhen)
+            .collect(Collectors.toList());
+  }
+
+  private List<TimeRange> splitRange(
+          TimeRange range, HashSet<Integer> unavailableMinutes, long duration) {
+    final LinkedList<TimeRange> availableTimeRanges = new LinkedList<>();
     /* Initialise a counter variable */
-    int i = TimeRange.START_OF_DAY;
+    int i = range.start();
 
     /*
      * Iterate for as long as there still exists another minute of the current
      * day that has not been queried for availability.
      */
-    while (i <= TimeRange.END_OF_DAY) {
+    while (i < range.end()) {
       /* The first minute of the current span of available time */
       int first = i;
       /* The last minute of the current span of available time */
@@ -109,7 +175,7 @@ public final class FindMeetingQuery {
        * Extend the upper bound of the current span of available time, until it
        * reaches an unavailable minute.
        */
-      while (i <= TimeRange.END_OF_DAY && !unavailableMinutes.contains(last)) {
+      while (i < range.end() && !unavailableMinutes.contains(last)) {
         i++;
         last = i;
       }
@@ -130,54 +196,12 @@ public final class FindMeetingQuery {
        * the necessary duration for the meeting requested, then create a
        * TimeRange to represent this available time slot.
        */
-      if (spanLength >= request.getDuration()) {
+      if (spanLength >= duration) {
         availableTimeRanges.add(TimeRange.fromStartEnd(first, last, false));
       }
     }
 
     return availableTimeRanges;
-  }
-
-  /**
-   * Choose the TimeRanges, from the list of available TimeRanges, which will be suggested as potential meeting times.
-   * Optional attendees are taken into account.
-   * @param events The events on the day of the request.
-   * @param request The request being made
-   * @param availableTimeRanges The list of available times on the day of the request.
-   * @return A List of timeRanges during which the meeting should be held.
-   */
-  private List<TimeRange> chooseTimeRanges(
-      Collection<Event> events, MeetingRequest request, List<TimeRange> availableTimeRanges) {
-    /* Construct a List of the TimeRanges during which at least one optional attendee is unavailable. */
-    List<TimeRange> unavailableTimeRangesForOpts = getUnavailableTimeRangesForOpts(events, request);
-
-    /* From the available TimeRanges, search for options which would allow optional attendees to attend */
-    List<TimeRange> availableTimeRangesWithOptsConsidered =
-        availableTimeRanges.stream()
-            /* Filter out all TimeRanges during which there would be scheduling conflict */
-            .filter(range -> !schedulingConflict(unavailableTimeRangesForOpts, range))
-            .collect(Collectors.toList());
-
-    /* If possible, invite optional attendees. Otherwise, do not include them. */
-    if (!availableTimeRangesWithOptsConsidered.isEmpty()) {
-      return availableTimeRangesWithOptsConsidered;
-    } else {
-      return availableTimeRanges;
-    }
-  }
-
-  /**
-   * Get the list of all TimeRanges during which at least one optional attendee is unavailable.
-   * @param events All events taking place on the day of the request
-   * @param request The request being made
-   * @return A List of TimeRanges during which at least one optional attendee is unavailable.
-   */
-  private List<TimeRange> getUnavailableTimeRangesForOpts(
-      Collection<Event> events, MeetingRequest request) {
-    return events.stream()
-        .filter(event -> anyIntersection(request.getOptionalAttendees(), event.getAttendees()))
-        .map(Event::getWhen)
-        .collect(Collectors.toList());
   }
 
   /**
@@ -190,18 +214,5 @@ public final class FindMeetingQuery {
    */
   private boolean anyIntersection(Collection<String> listA, Collection<String> listB) {
     return listA.stream().anyMatch(listB::contains);
-  }
-
-  /**
-   * Return true if the provided TimeRange is NOT available, according to the Collection of
-   * unavailable TimeRanges provided.
-   *
-   * @param unavailableTimeRanges The Collection of TimeRanges which are unavailable.
-   * @param range The TimeRange to be tested for availability.
-   * @return Whether inserting {@code range} into a calendar alongside all the TimeRanges in {@code
-   *     unavailableTimeRanges} would cause a scheduling conflict.
-   */
-  private boolean schedulingConflict(Collection<TimeRange> unavailableTimeRanges, TimeRange range) {
-    return unavailableTimeRanges.stream().anyMatch(range::overlaps);
   }
 }
