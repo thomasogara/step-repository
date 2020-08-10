@@ -24,12 +24,17 @@ import java.util.stream.Collectors;
 public final class FindMeetingQuery {
   /**
    * Find all suitable spans of time during which the given meeting request can be fulfilled, with
-   * the given list of attendees' daily events being taken into consideration.
+   * the given list of attendees' daily events taken into consideration.
    *
-   * @param events The list of all events scheduled on the day of the meeting request. Not all
-   *     events must be associated with an attendee of the meeting.
-   * @param request The details of the meeting being scheduled. Duration, attendees, and optional
-   *     attendees are included here.
+   * <p>This function runs in O(E + E*A) time, where E is the number of events on the day of the
+   * meeting request, and A is the number of TimeRanges for which the mandatory attendees are
+   * available. It is important to note that A is a product of the algorithm, and its size cannot be
+   * determined ahead of time.
+   *
+   * @param events  The list of all events scheduled on the day of the meeting request. Not all
+   *                events must be associated with an attendee of the meeting.
+   * @param request The details of the meeting request. Duration, attendees, and optional attendees
+   *                are included here.
    */
   public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
     // There must be a list of events
@@ -76,8 +81,11 @@ public final class FindMeetingQuery {
   /**
    * Schedule a meeting with the provided constraints.
    *
+   * <p>This function runs in O(E*A) time, where E is the number of events, and A is the number of
+   * available TimeRange's.
+   *
    * @param events              All events on the day of the request.
-   * @param request             The request being made.
+   * @param request             The request made.
    * @param availableTimeRanges The TimeRanges during which the event can be scheduled.
    * @param attendees           The list of attendees to be invited to the event.
    * @return A List of TimeRanges during which the requested meeting can be held, with all provided
@@ -112,13 +120,15 @@ public final class FindMeetingQuery {
   }
 
   /**
-   * Get all of the minutes of the day during which at least one attendee is unavailable, using the
-   * list of unavailable TimeRanges provided.
+   * Get all minutes of the day during which at least one attendee is unavailable, using the list of
+   * unavailable TimeRanges provided.
+   *
+   * <p>This function runs in O(A) time, where A is the number of unavailable TimeRange's.
    *
    * @param unavailableTimeRanges A List of TimeRanges during which at least one attendee is
-   *                              unavailable to attend a meeting.
+   *     unavailable to attend a meeting.
    * @return A HashSet of integers containing all minutes of the day during which at least one
-   * attendee is unavailable.
+   *     attendee is unavailable.
    */
   private HashSet<Integer> getUnavailableMinutes(Collection<TimeRange> unavailableTimeRanges) {
     HashSet<Integer> unavailableMinutes = new HashSet<>();
@@ -137,7 +147,7 @@ public final class FindMeetingQuery {
   }
 
   /**
-   * Get all of the TimeRanges during which at least one attendee is unavailable.
+   * Get all TimeRanges during which at least one attendee is unavailable.
    *
    * @param events    The events on the day of the request
    * @param attendees The attendees of the meeting.
@@ -155,6 +165,16 @@ public final class FindMeetingQuery {
             .collect(Collectors.toList());
   }
 
+  /**
+   * Split a given TimeRange into a List of mutually exclusive ranges, which have a length greater
+   * than or equal to {@code duration}.
+   *
+   * @param range              The range to split.
+   * @param unavailableMinutes The unavailable minutes of the day.
+   * @param duration           The duration of the meeting request.
+   * @return A List of TimeRanges during any of which the meeting can be scheduled. All ranges are
+   * as long as possible, so that there are no adjacent ranges.
+   */
   private List<TimeRange> splitRange(
           TimeRange range, HashSet<Integer> unavailableMinutes, long duration) {
     final LinkedList<TimeRange> availableTimeRanges = new LinkedList<>();
