@@ -78,17 +78,17 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/comments")
 public class DataServlet extends HttpServlet {
   public static final String NO_IMAGE_UPLOAD = "";
-  private final static int ALL_COMMENTS = -1;
+  private static final int ALL_COMMENTS = -1;
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String parameterMaxComments = getParameter(request, "maxComments", "");
     int maxComments = 0;
 
-    try{
+    try {
       maxComments = Integer.parseInt(parameterMaxComments);
     } catch (NumberFormatException ex) {
-      // If maxComments parameter is excluded or malformed, return all comments
+      // If maxComments parameter is excluded or malformed, return all comments.
       maxComments = DataServlet.ALL_COMMENTS;
     }
 
@@ -99,7 +99,7 @@ public class DataServlet extends HttpServlet {
     FetchOptions fetchOptions = FetchOptions.Builder.withLimit(maxComments);
 
     List<Comment> comments = new ArrayList<>();
-    for ( Entity entity : results.asIterable(fetchOptions) ) {
+    for (Entity entity : results.asIterable(fetchOptions)) {
       long id = entity.getKey().getId();
       String title = (String) entity.getProperty("title");
       String text = (String) entity.getProperty("text");
@@ -118,38 +118,50 @@ public class DataServlet extends HttpServlet {
   }
 
   @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String title = getParameter(request, "title", "");
     String text = getParameter(request, "text", "");
     long timestamp = System.currentTimeMillis();
     String imageURL = getUploadedFileUrl(request, "imageURL");
-    
-    /* 
+
+    /*
      * \\s represents any whitespace character
      * + is a quantifier. it translates to 'one or more'
-     * the pattern therefore matches 'one or more whitespace characters'
+     * The pattern therefore matches 'one or more whitespace characters'.
      */
     String WHITESPACE_REGEX = "\\s+";
-    
-    /* remove all whitespace from the text String */
+
+    /* Remove all whitespace from the text String. */
     String commentTextWhitespaceRemoved = text.replaceAll(WHITESPACE_REGEX, "");
-    
-    /* if the commentText String, with all whitespace removed, is empty, then the comment is rejected */
+
+    /* If the commentText String, with all whitespace removed, is empty, then the comment is rejected. */
     if (commentTextWhitespaceRemoved.equals("")) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
     }
 
     BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
-    /* Get a list of all files uploaded to blobstore from this request */
+    /*
+     * Get a Map of all file(s) uploaded to Blobstore from this request, keyed using the "name"
+     * attribute of the form input element that they were uploaded from.
+     * Since HTML5 forms do not guarantee the uniqueness of the "name" attribute of the input
+     * elements, a List of the BlobKey(s) associated with all file(s) uploaded with a given "name"
+     * must be mapped to.
+     */
     Map<String, List<BlobKey>> blobs = blobstoreService.getUploads(request);
-    /* Get the blobKey associated with the image uploaded */
+
+    /*
+     * Get the blobKeys associated with the file(s) uploaded with the name "imageURL".
+     */
     List<BlobKey> blobKeys = blobs.get("imageURL");
 
     String blobKey = NO_IMAGE_UPLOAD;
 
-    // if a file was uploaded
-    if( blobKeys != null && !blobKeys.isEmpty() ) {
-      // the form only contains a single file input, so get the first key
+    // If a file was uploaded.
+    if (blobKeys != null && !blobKeys.isEmpty()) {
+      /*
+       * Since the form only contains a single input element with the name "imageURL", get the
+       * fist BlobKey in the list, and convert it to a String.
+       */
       blobKey = blobKeys.get(0).getKeyString();
     }
 
@@ -160,7 +172,6 @@ public class DataServlet extends HttpServlet {
     commentEntity.setProperty("imageURL", imageURL);
     commentEntity.setProperty("imageBlobstoreKey", blobKey);
 
-
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(commentEntity);
 
@@ -168,8 +179,8 @@ public class DataServlet extends HttpServlet {
   }
 
   /**
-   * @return the request parameter, or the default value if the parameter
-   *         was not specified by the client
+   * @return the request parameter, or the default value if the parameter was not specified by the
+   * client
    */
   private String getParameter(HttpServletRequest request, String name, String defaultValue) {
     String value = request.getParameter(name);
@@ -204,7 +215,8 @@ public class DataServlet extends HttpServlet {
     ImagesService imagesService = ImagesServiceFactory.getImagesService();
     ServingUrlOptions options = ServingUrlOptions.Builder.withBlobKey(blobKey);
 
-    // To support running in Google Cloud Shell with AppEngine's dev server, we must use the relative
+    // To support running in Google Cloud Shell with AppEngine's dev server, we must use the
+    // relative
     // path to the image, rather than the path returned by imagesService which contains a host.
     try {
       URL url = new URL(imagesService.getServingUrl(options));
