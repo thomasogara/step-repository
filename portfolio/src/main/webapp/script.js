@@ -188,8 +188,12 @@ const loadComments = async (maxComments) => {
       // the client must wait for confirmation of comment deletion
       // before proceeding to refresh comments, otherwise client will
       // fall out of sync with the server
-      await deleteComment(comment.id, comment.imageBlobstoreKey);
-      refreshComments();
+      const response = await deleteComment(comment.id, comment.imageBlobstoreKey);
+      if ( !response.ok ) {
+        alert('Your comment could not be deleted. Please refresh the page and try again.');
+      } else {
+        refreshComments();
+      }
     };
   });
 };

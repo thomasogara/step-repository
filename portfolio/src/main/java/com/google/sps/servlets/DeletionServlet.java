@@ -15,10 +15,12 @@
 package com.google.sps.servlets;
 
 import com.google.appengine.api.blobstore.BlobKey;
+import com.google.appengine.api.blobstore.BlobstoreFailureException;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.gson.Gson;
@@ -35,11 +37,11 @@ import org.apache.commons.io.IOUtils;
 public class DeletionServlet extends HttpServlet {
 
   /**
-    * POST handler for the /delete-comment route
-    */
+   * POST handler for the /delete-comment route
+   */
   @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
-    /* 
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    /*
      * Get the body of the request.
      * deletionRequestJSON must be a json encoded DeletionRequestBody, with shape similar to below:
      * {
@@ -64,7 +66,11 @@ public class DeletionServlet extends HttpServlet {
     // This id can be used to reconstruct the key using .createKey()
     Key key = KeyFactory.createKey("Comment", body.getId());
 
-    datastore.delete(key);
+    try {
+      datastore.delete(key);
+    } catch (DatastoreFailureException ex) {
+      response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+    }
 
     // Initialise a connection to Blobstore
     BlobstoreService blobstore = BlobstoreServiceFactory.getBlobstoreService();
@@ -75,12 +81,16 @@ public class DeletionServlet extends HttpServlet {
     // be viable for deletion.
     BlobKey blobKey = new BlobKey(body.getImageBlobstoreKey());
 
-    blobstore.delete(blobKey);
+    try {
+      blobstore.delete(blobKey);
+    } catch (BlobstoreFailureException exception) {
+      response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+    }
   }
 
   /**
-   * @return the request parameter, or the default value if the parameter
-   *         was not specified by the client.
+   * @return the request parameter, or the default value if the parameter was not specified by the
+   *     client.
    */
   private String getParameter(HttpServletRequest request, String name, String defaultValue) {
     String value = request.getParameter(name);
@@ -90,9 +100,7 @@ public class DeletionServlet extends HttpServlet {
     return value;
   }
 
-  /**
-    * The body of a request sent to the deletion servlet.
-    */
+  /** The body of a request sent to the deletion servlet. */
   private class DeletionRequestBody {
     // The only parameter in the body is the id of the comment to be deleted.
     private long id;
@@ -103,7 +111,7 @@ public class DeletionServlet extends HttpServlet {
     }
 
     public String getImageBlobstoreKey() {
-        return this.imageBlobstoreKey;
+      return this.imageBlobstoreKey;
     }
   }
 }
