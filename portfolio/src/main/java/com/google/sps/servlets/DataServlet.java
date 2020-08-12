@@ -58,7 +58,7 @@ import javax.servlet.http.HttpServletResponse;
  * The response body will be encoded as json.
  * The response body will contain a single top-level array, whose
  * elements will all be Comment objects.
- * Comment objects have five members:
+ * Comment objects have the following members:
  *   id: the id of the comment in the server's datastore
  *   title: the comment title
  *   text: the comment text
