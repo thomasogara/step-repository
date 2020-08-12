@@ -139,7 +139,6 @@ public class DataServlet extends HttpServlet {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
     }
 
-    /* Open a connection to blobstore */
     BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
     /* Get a list of all files uploaded to blobstore from this request */
     Map<String, List<BlobKey>> blobs = blobstoreService.getUploads(request);
