@@ -302,7 +302,7 @@ const commentFormValidator = async () => {
     return false;
   } else {
     // If the user is logged in, return true, allowing form submission
-    return false;
+    return true;
   }
 };
 
