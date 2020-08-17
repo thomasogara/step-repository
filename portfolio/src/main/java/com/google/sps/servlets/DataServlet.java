@@ -22,8 +22,9 @@ import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.images.ImagesService;
 import com.google.appengine.api.images.ImagesServiceFactory;
@@ -57,7 +58,7 @@ import javax.servlet.http.HttpServletResponse;
  * The response body will be encoded as json.
  * The response body will contain a single top-level array, whose
  * elements will all be Comment objects.
- * Comment objects have five members:
+ * Comment objects have the following members:
  *   id: the id of the comment in the server's datastore
  *   title: the comment title
  *   text: the comment text
@@ -77,24 +78,28 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/comments")
 public class DataServlet extends HttpServlet {
   public static final String NO_IMAGE_UPLOAD = "";
+  private static final int ALL_COMMENTS = -1;
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    long maxComments = Long.parseLong(request.getParameter("maxComments"));
+    String parameterMaxComments = getParameter(request, "maxComments", "");
+    int maxComments = 0;
 
-    // a value of -1 indicates that ALL comments are wanted
-    if (maxComments == -1) maxComments = Long.MAX_VALUE;
+    try {
+      maxComments = Integer.parseInt(parameterMaxComments);
+    } catch (NumberFormatException ex) {
+      // If maxComments parameter is excluded or malformed, return all comments.
+      maxComments = DataServlet.ALL_COMMENTS;
+    }
 
     Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery results = datastore.prepare(query);
+    FetchOptions fetchOptions = FetchOptions.Builder.withLimit(maxComments);
 
     List<Comment> comments = new ArrayList<>();
-    for ( Entity entity : results.asIterable() ) {
-      if (comments.size() >= maxComments ) {
-        break;
-      }
+    for (Entity entity : results.asIterable(fetchOptions)) {
       long id = entity.getKey().getId();
       String title = (String) entity.getProperty("title");
       String text = (String) entity.getProperty("text");
@@ -112,38 +117,49 @@ public class DataServlet extends HttpServlet {
   }
 
   @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String title = getParameter(request, "title", "");
     String text = getParameter(request, "text", "");
     long timestamp = System.currentTimeMillis();
     
-    /* 
+    /*
      * \\s represents any whitespace character
      * + is a quantifier. it translates to 'one or more'
-     * the pattern therefore matches 'one or more whitespace characters'
+     * The pattern therefore matches 'one or more whitespace characters'.
      */
     String WHITESPACE_REGEX = "\\s+";
-    
-    /* remove all whitespace from the commentText String */
+
+    /* Remove all whitespace from the text String. */
     String commentTextWhitespaceRemoved = text.replaceAll(WHITESPACE_REGEX, "");
-    
-    /* if the commentText String, with all whitespace removed, is empty, then the comment is rejected */
+
+    /* If the commentText String, with all whitespace removed, is empty, then the comment is rejected. */
     if (commentTextWhitespaceRemoved.equals("")) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
     }
 
-    /* Open a connection to blobstore */
     BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
-    /* Get a list of all files uploaded to blobstore from this request */
+    /*
+     * Get a Map of all file(s) uploaded to Blobstore from this request, keyed using the "name"
+     * attribute of the form input element that they were uploaded from.
+     * Since HTML5 forms do not guarantee the uniqueness of the "name" attribute of the input
+     * elements, a List of the BlobKey(s) associated with all file(s) uploaded with a given "name"
+     * must be mapped to.
+     */
     Map<String, List<BlobKey>> blobs = blobstoreService.getUploads(request);
-    /* Get the blobKey associated with the image uploaded */
+
+    /*
+     * Get the blobKeys associated with the file(s) uploaded with the name "imageURL".
+     */
     List<BlobKey> blobKeys = blobs.get("imageURL");
 
     String blobKey = NO_IMAGE_UPLOAD;
 
-    // if a file was uploaded
-    if( blobKeys != null && !blobKeys.isEmpty() ) {
-      // the form only contains a single file input, so get the first key
+    // If a file was uploaded.
+    if (blobKeys != null && !blobKeys.isEmpty()) {
+      /*
+       * Since the form only contains a single input element with the name "imageURL", get the
+       * fist BlobKey in the list, and convert it to a String.
+       */
       blobKey = blobKeys.get(0).getKeyString();
     }
 
@@ -153,7 +169,6 @@ public class DataServlet extends HttpServlet {
     commentEntity.setProperty("timestamp", timestamp);
     commentEntity.setProperty("imageBlobstoreKey", blobKey);
 
-
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(commentEntity);
 
@@ -161,8 +176,8 @@ public class DataServlet extends HttpServlet {
   }
 
   /**
-   * @return the request parameter, or the default value if the parameter
-   *         was not specified by the client
+   * @return the request parameter, or the default value if the parameter was not specified by the
+   * client
    */
   private String getParameter(HttpServletRequest request, String name, String defaultValue) {
     String value = request.getParameter(name);
