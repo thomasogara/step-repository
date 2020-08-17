@@ -29,14 +29,14 @@ public class BlobstoreServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    // open a connection to blobstore
+    // Open a connection to blobstore.
     BlobstoreService blobstore = BlobstoreServiceFactory.getBlobstoreService();
 
-    // create a url which will process a form upload and forward the processed
-    // form to the /comments route
+    // Create a url which will process a form upload and forward the processed
+    // form to the /comments route.
     String url = blobstore.createUploadUrl("/comments");
 
-    // encode the data as json and send to the client
+    // Encode the data as json and send to the client.
     Gson gson = new Gson();
     response.setContentType("application/json");
     response.getWriter().println(gson.toJson(url));
