@@ -179,7 +179,9 @@ const loadComments = async (maxComments) => {
     div.id = comment.id;
     /* If the comment has a title, display it, else use the default message */
     title.innerText = comment.title || 'This comment does not have a title';
-    commentImage.src = comment.imageURL;
+    loadCommentImage(comment.imageBlobstoreKey).then((url) => {
+      commentImage.src = url;
+    });
     paragraph.innerText = comment.text;
     timestamp.innerText = new Date(comment.timestamp).toLocaleString();
     trashImage.src = '/images/trash.png';
@@ -216,6 +218,24 @@ const loadFormAction = async () => {
   const formElement = document.getElementById('comment-form');
   /* Set the comment form to upload to the route provided by BlobStore */
   formElement.action = url;
+};
+
+/**
+ * Returns a URL pointing to a comment's image.
+ * @param {string} imageBlobstoreKey The blobstore key of the image to be
+ * loaded.
+ */
+const loadCommentImage = async (imageBlobstoreKey) => {
+  // request the image from the image load servlet.
+  const response = await fetch(
+      `/image-load?imageBlobstoreKey=${imageBlobstoreKey}`
+  );
+  // extract the blob from the response. this blob will be the comment image.
+  const blob = await response.blob();
+  // store the blob locally in the browser's storage, and create a URL pointing
+  // to this local resource.
+  const imageURL = window.URL.createObjectURL(blob);
+  return imageURL;
 };
 
 /**
