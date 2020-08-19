@@ -150,6 +150,9 @@ public final class FindMeetingQuery {
   /**
    * Get all TimeRanges during which at least one attendee is unavailable.
    *
+   * <p>This function runs in O(A * N) time, where A is the total number of attendees of
+   * the meeting, and N is the total number of attendees across all events of the day.
+   *
    * @param events    The events on the day of the request
    * @param attendees The attendees of the meeting.
    * @return A List of TimeRanges during which at least one of the attendees is unavailable.
