@@ -151,7 +151,7 @@ public final class FindMeetingQuery {
    *
    * @param events    The events on the day of the request
    * @param attendees The attendees of the meeting.
-   * @return A
+   * @return A List of TimeRanges during which at least one of the attendees is unavailable.
    */
   private List<TimeRange> getUnavailableTimeRanges(
           Collection<Event> events, Collection<String> attendees) {
