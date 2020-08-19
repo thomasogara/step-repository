@@ -77,7 +77,14 @@ public final class FindMeetingQuery {
   }
 
   /**
-   * Schedule a meeting with the provided constraints.
+   * Select the TimeRanges, from the list of available TimeRanges provided, during which all members
+   * of the list of attendees provided are available for a meeting. The list of attendees provided does
+   * not need to be the list of mandatory attendees.
+   *
+   * This method can be called repeatedly, passing its own output into successive calls as the
+   * {@code availableTimeRanges} parameter, in order to include more attendees in the scheduling decision.
+   * This pattern, of calling the method on its own output, is often used to include optional
+   * attendees for the meeting.
    *
    * <p>This function runs in O(E*A) time, where E is the number of events, and A is the number of
    * available TimeRange's.
