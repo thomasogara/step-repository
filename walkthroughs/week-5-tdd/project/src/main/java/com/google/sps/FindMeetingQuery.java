@@ -40,11 +40,9 @@ public final class FindMeetingQuery {
     if (events == null) {
       throw new IllegalArgumentException("'events' parameter cannot be null");
     }
-    // There must be a request
     if (request == null) {
       throw new IllegalArgumentException("'request' parameter cannot be null");
     }
-    // There must be a set of attendees
     if (request.getAttendees() == null) {
       throw new IllegalArgumentException("'request' parameter's set of attendees cannot be null");
     }
