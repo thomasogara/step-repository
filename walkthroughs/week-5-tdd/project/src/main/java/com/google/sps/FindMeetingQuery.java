@@ -26,6 +26,8 @@ public final class FindMeetingQuery {
    * Find all suitable spans of time during which the given meeting request can be fulfilled, with
    * the given list of attendees' daily events taken into consideration.
    *
+   * <p><b>A meeting's duration cannot exceed one day's duration.<b>
+   *
    * <p>This function runs in O(E + E*A) time, where E is the number of events on the day of the
    * meeting request, and A is the number of TimeRanges for which the mandatory attendees are
    * available. It is important to note that A is a product of the algorithm, and its size cannot be
@@ -46,10 +48,9 @@ public final class FindMeetingQuery {
     if (request.getAttendees() == null) {
       throw new IllegalArgumentException("'request' parameter's set of attendees cannot be null");
     }
-    // The duration must not exceed one day
+    // The duration must not exceed one day. 
+    // Disallowing a request that exceeds 1 day's duration is encoded in the test noOptionsForTooLongOfARequest()
     if (request.getDuration() > TimeRange.WHOLE_DAY.duration()) {
-      // returning an empty list in the case of a request that exceeds 1 day's
-      // duration is encoded in the test noOptionsForTooLongOfARequest()
       return new LinkedList<>();
     }
 
