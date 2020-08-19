@@ -368,7 +368,7 @@ public final class FindMeetingQueryTest {
   }
 
   @Test
-  public void onlyOptionalAttendeesAllUnavailalbe() {
+  public void onlyOptionalAttendeesAllUnavailable() {
     // Have two optional attendees, each with no gaps in their schedule.
     // The whole day should be identified as available.
     // Events: |--------------A--------------|
