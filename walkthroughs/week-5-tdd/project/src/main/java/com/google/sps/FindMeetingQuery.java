@@ -37,7 +37,6 @@ public final class FindMeetingQuery {
    *                are included here.
    */
   public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
-    // There must be a list of events
     if (events == null) {
       throw new IllegalArgumentException("'events' parameter cannot be null");
     }
