@@ -234,7 +234,7 @@ const displayLoginForm = async () => {
 };
 
 /**
- * Dispaly a comment form to the user if they are logged in.
+ * Display a comment form to the user if they are logged in.
  */
 const displayCommentForm = async () => {
   const loggedIn = await checkLoginStatus();
