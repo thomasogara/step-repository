@@ -204,9 +204,18 @@ const loadComments = async (maxComments) => {
  * @return {boolean} Whether the user is loggged in
  */
 const checkLoginStatus = async () => {
-  const response = await fetch('/login-status');
-  const responseBody = await response.json();
-  const loggedIn = responseBody.loggedIn; 
+  let loggedIn = false;
+  const loginServiceUnavailable =
+      `Sorry, the login service is down! :(
+       Please refresh the page if you would like to log in.`;
+  const loginServiceMalfunction =
+      `Sorry, the login service is experiencing trouble! :(
+      Please refresh the page if you would like to log in.`
+  fetch('/login-status')
+      .catch(error => alert(loginServiceUnavailable))
+      .then(response => response.json())
+          .catch(error => alert(loginServiceMalfunction))
+          .then(responseBody => loggedIn = resonseBody.loggedIn);
 
   return loggedIn;
 };
