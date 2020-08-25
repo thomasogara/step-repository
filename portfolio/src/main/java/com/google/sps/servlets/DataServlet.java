@@ -14,6 +14,7 @@
 
 package com.google.sps.servlets;
 
+
 import com.google.appengine.api.blobstore.BlobInfo;
 import com.google.appengine.api.blobstore.BlobInfoFactory;
 import com.google.appengine.api.blobstore.BlobKey;
@@ -26,9 +27,8 @@ import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
-import com.google.appengine.api.images.ImagesService;
-import com.google.appengine.api.images.ImagesServiceFactory;
-import com.google.appengine.api.images.ServingUrlOptions;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
 import com.google.sps.data.Comment;
 import java.io.IOException;
@@ -77,20 +77,24 @@ import javax.servlet.http.HttpServletResponse;
 /** Servlet that returns a programmable number of comments */
 @WebServlet("/comments")
 public class DataServlet extends HttpServlet {
-  public static final String NO_IMAGE_UPLOAD = "";
-  private static final int ALL_COMMENTS = -1;
+  private final static int ALL_COMMENTS = Integer.MAX_VALUE;
+  private final static String NO_IMAGE_UPLOAD = "";
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String parameterMaxComments = getParameter(request, "maxComments", "");
     int maxComments = 0;
 
-    try {
+    try{
       maxComments = Integer.parseInt(parameterMaxComments);
+      // on the frontend, -1 is used as a flag for displaying all comments
+      // since FetchOptions assumes non-negative limits, this must be
+      // mapped to the backend flag for displaying all comment, ALL_COMMENTS
+      if (maxComments == -1) {
+          maxComments = ALL_COMMENTS;
+      }
     } catch (NumberFormatException ex) {
-      // If maxComments parameter is excluded or malformed, return all comments.
-      maxComments = DataServlet.ALL_COMMENTS;
-    }
+      // If maxComments parameter is excluded or malformed, return all comments
 
     Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
 
@@ -99,14 +103,16 @@ public class DataServlet extends HttpServlet {
     FetchOptions fetchOptions = FetchOptions.Builder.withLimit(maxComments);
 
     List<Comment> comments = new ArrayList<>();
-    for (Entity entity : results.asIterable(fetchOptions)) {
+
+    for ( Entity entity : results.asIterable(fetchOptions) ) {
       long id = entity.getKey().getId();
       String title = (String) entity.getProperty("title");
       String text = (String) entity.getProperty("text");
       long timestamp = (long) entity.getProperty("timestamp");
       String imageBlobstoreKey = (String) entity.getProperty("imageBlobstoreKey");
+      String userEmail = (String) entity.getProperty("userEmail");
 
-      Comment comment = new Comment(id, title, text, timestamp, imageBlobstoreKey);
+      Comment comment = new Comment(id, title, text, timestamp, imageBlobstoreKey, userEmail);
       comments.add(comment);
     }
 
@@ -117,9 +123,18 @@ public class DataServlet extends HttpServlet {
   }
 
   @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
+    UserService userService = UserServiceFactory.getUserService();
+
+    if ( !userService.isUserLoggedIn() ) {
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+      return;
+    }
+
     String title = getParameter(request, "title", "");
     String text = getParameter(request, "text", "");
+    String userEmail = userService.getCurrentUser().getEmail();
+    System.out.println(userEmail);
     long timestamp = System.currentTimeMillis();
     
     /*
@@ -168,6 +183,7 @@ public class DataServlet extends HttpServlet {
     commentEntity.setProperty("text", text);
     commentEntity.setProperty("timestamp", timestamp);
     commentEntity.setProperty("imageBlobstoreKey", blobKey);
+    commentEntity.setProperty("userEmail", userEmail);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(commentEntity);

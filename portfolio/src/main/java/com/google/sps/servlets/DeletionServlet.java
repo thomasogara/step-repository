@@ -40,8 +40,8 @@ public class DeletionServlet extends HttpServlet {
    * POST handler for the /delete-comment route
    */
   @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    /*
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
+    /* 
      * Get the body of the request.
      * deletionRequestJSON must be a json encoded DeletionRequestBody, with shape similar to below:
      * {
@@ -89,8 +89,8 @@ public class DeletionServlet extends HttpServlet {
   }
 
   /**
-   * @return the request parameter, or the default value if the parameter was not specified by the
-   *     client.
+   * @return the request parameter, or the default value if the parameter
+   *         was not specified by the client.
    */
   private String getParameter(HttpServletRequest request, String name, String defaultValue) {
     String value = request.getParameter(name);
@@ -100,7 +100,9 @@ public class DeletionServlet extends HttpServlet {
     return value;
   }
 
-  /** The body of a request sent to the deletion servlet. */
+  /**
+    * The body of a request sent to the deletion servlet.
+    */
   private class DeletionRequestBody {
     // The only parameter in the body is the id of the comment to be deleted.
     private long id;
