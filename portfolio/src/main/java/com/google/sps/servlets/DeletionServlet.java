@@ -15,10 +15,12 @@
 package com.google.sps.servlets;
 
 import com.google.appengine.api.blobstore.BlobKey;
+import com.google.appengine.api.blobstore.BlobstoreFailureException;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.gson.Gson;
@@ -35,8 +37,8 @@ import org.apache.commons.io.IOUtils;
 public class DeletionServlet extends HttpServlet {
 
   /**
-    * POST handler for the /delete-comment route
-    */
+   * POST handler for the /delete-comment route
+   */
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
     /* 
@@ -59,15 +61,31 @@ public class DeletionServlet extends HttpServlet {
 
     // Initialise a connection to DataStore.
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    BlobstoreService blobstore = BlobstoreServiceFactory.getBlobstoreService();
 
     // Each key has a unique id associated with it.
     // This id can be used to reconstruct the key using .createKey()
     Key key = KeyFactory.createKey("Comment", body.getId());
+
+    try {
+      datastore.delete(key);
+    } catch (DatastoreFailureException ex) {
+      response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+    }
+
+    // Initialise a connection to Blobstore
+    BlobstoreService blobstore = BlobstoreServiceFactory.getBlobstoreService();
+
+    // Create a BlobKey from the provided BlobKey String
+    // In case of an invalid or non-existent BlobKey, the servlet will quit.
+    // This is expected, as some comments don't have images but should still
+    // be viable for deletion.
     BlobKey blobKey = new BlobKey(body.getImageBlobstoreKey());
 
-    datastore.delete(key);
-    blobstore.delete(blobKey);
+    try {
+      blobstore.delete(blobKey);
+    } catch (BlobstoreFailureException exception) {
+      response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+    }
   }
 
   /**
@@ -95,15 +113,7 @@ public class DeletionServlet extends HttpServlet {
     }
 
     public String getImageBlobstoreKey() {
-        return this.imageBlobstoreKey;
-    }
-
-    public String toString() {
-      return String.format(
-          "DeletionRequestBody{ id=\"%d\", imageBlobstoreKey = %s }",
-          this.id,
-          this.imageBlobstoreKey
-      );
+      return this.imageBlobstoreKey;
     }
   }
 }

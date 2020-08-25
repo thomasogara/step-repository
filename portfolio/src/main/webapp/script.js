@@ -194,8 +194,12 @@ const loadComments = async (maxComments) => {
       // the client must wait for confirmation of comment deletion
       // before proceeding to refresh comments, otherwise client will
       // fall out of sync with the server
-      await deleteComment(comment.id, comment.imageBlobstoreKey);
-      refreshComments();
+      const response = await deleteComment(comment.id, comment.imageBlobstoreKey);
+      if ( !response.ok ) {
+        alert('Your comment could not be deleted. Please refresh the page and try again.');
+      } else {
+        refreshComments();
+      }
     };
   });
 };
@@ -204,9 +208,18 @@ const loadComments = async (maxComments) => {
  * @return {boolean} Whether the user is loggged in
  */
 const checkLoginStatus = async () => {
-  const response = await fetch('/login-status');
-  const responseBody = await response.json();
-  const loggedIn = responseBody.loggedIn; 
+  let loggedIn = false;
+  const loginServiceUnavailable =
+      `Sorry, the login service is down! :(
+       Please refresh the page if you would like to log in.`;
+  const loginServiceMalfunction =
+      `Sorry, the login service is experiencing trouble! :(
+      Please refresh the page if you would like to log in.`
+  fetch('/login-status')
+      .catch(error => alert(loginServiceUnavailable))
+      .then(response => response.json())
+          .catch(error => alert(loginServiceMalfunction))
+          .then(responseBody => loggedIn = resonseBody.loggedIn);
 
   return loggedIn;
 };
@@ -234,7 +247,7 @@ const displayLoginForm = async () => {
 };
 
 /**
- * Dispaly a comment form to the user if they are logged in.
+ * Display a comment form to the user if they are logged in.
  */
 const displayCommentForm = async () => {
   const loggedIn = await checkLoginStatus();
@@ -302,7 +315,7 @@ const commentFormValidator = async () => {
     return false;
   } else {
     // If the user is logged in, return true, allowing form submission
-    return false;
+    return true;
   }
 };
 
