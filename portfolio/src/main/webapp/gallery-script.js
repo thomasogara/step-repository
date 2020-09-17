@@ -3,7 +3,7 @@
  */
 const loadProjects = async() => {
   const response = await fetch('./projects.json');
-  const json = await response.text();
+  const json = await response.json();
   addProjectsToDOM(json);
 }
 
@@ -19,28 +19,43 @@ const loadProjects = async() => {
     - blog_link{String} : URL linking to a blog post about the project
  */
 const addProjectsToDOM = async (json) => {
-  console.log(json);
-  const data = JSON.parse(json);
   /*
     process each project contained within the json object,
     and append an img element with that project's preview
     image to the 'content' div of gallery.html
   */
   json.projects.map(async (project) => {
-    const content = document.getElementById('projects');
-    const link = document.createElement('a');
-    const header = document.createElement('h2');
+    const projectsContainer = document.getElementById('projects');
+    const sourceCodeLink = document.createElement('a');
+    const blogLink = document.createElement('a');
+    const title = document.createElement('h2');
     const details = document.createElement('p');
-    const div = document.createElement('div');
+    const projectDiv = document.createElement('div');
     const img = document.createElement('img');
-    content.appendChild(div);
-    div.appendChild(link);
-    div.appendChild(img);
-    link.appendChild(header);
-    div.appendChild(details);
-    link.href = project.URL;
+
+    /* Add a div to the DOM to store the information on this project */
+    projectsContainer.appendChild(projectDiv);
+
+    /* Add the project title at the top of the project div */
+    /* The title is wrapped in a link, linking to the blog post for the project */
+    blogLink.appendChild(header);
+    projectDiv.appendChild(blogLink);
+
+    /* Add the project image below the project title */
+    /* The image is wrapped in a link, linking to the source code for the project */
+    sourceCodeLink.appendChild(img);
+    projectDiv.appendChild(sourceCodeLink);
+
+    /* Add the project details below the project image */
+    projectDiv.appendChild(details);
+
+    /* Extract all information from the project, and add it to the
+     * relevant element on the page */
+    sourceCodeLink.href = project.source;
+    blogLink.href = project.blog;
     header.innerText = project.title;
     img.src = project.preview;
+    img.alt = `Screenshot of the ${project.title} project`;
     details.innerText = project.description;
   });
 }

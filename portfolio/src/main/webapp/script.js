@@ -169,23 +169,27 @@ const loadComments = async (maxComments) => {
     div.appendChild(deleteButton);
     deleteButton.appendChild(trashImage);
 
-    div.classList.add('comment');
-    title.classList.add('comment-title');
-    commentImage.classList.add('comment-image');
-    paragraph.classList.add('comment-body');
-    timestamp.classList.add('comment-timestamp');
+    div.classList.add('position-relative');
+    commentImage.classList.add('mw-100');
+    /*
+     * comment-delete-button is a custom css class in style.css
+     * It is the only aspect of the styling that is not done with bootstrap.
+     * The class places the delete button in the bottom right of the comment.
+     */
     deleteButton.classList.add('comment-delete-button');
 
     div.id = comment.id;
-    /* If the comment has a title, display it, else use the default message */
-    title.innerText = comment.title || 'This comment does not have a title';
+    title.innerText = comment.title;
     loadCommentImage(comment.imageBlobstoreKey).then((url) => {
       commentImage.src = url;
     });
     paragraph.innerText = comment.text;
     timestamp.innerText = new Date(comment.timestamp).toLocaleString();
     trashImage.src = '/images/trash.png';
-    /* Set the function handling the onclick event of the delete button */
+    /*
+     * Set the function handling the onclick event of the delete button.
+     * The function will not be called until the user decides to delete a comment.
+     */
     deleteButton.onclick = async () => {
       // the client must wait for confirmation of comment deletion
       // before proceeding to refresh comments, otherwise client will

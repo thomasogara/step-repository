@@ -2,10 +2,10 @@
   "projects": [
     {
       "title": "Portfolio Website",
-      "URL": "https://github.com/thomasogara/step-repository/tree/master/portfolio",
+      "source": "https://github.com/thomasogara/step-repository/tree/master/portfolio",
       "preview": "",
-      "description": "A portfolio website designed using HTML, CSS, and vanilla JavaScript.",
-      "blog_link": "index.html"
+      "description": "A portfolio website designed using HTML, CSS, and vanilla JavaScript. Backend programmed using Java Servlets.",
+      "blog": "portfolio.html"
     }
   ]
 }
